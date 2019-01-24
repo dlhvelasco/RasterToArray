@@ -12,12 +12,14 @@ filepath = "/home/dwight.velasco/dwight.velasco/scratch1/THESIS/MYD04_3K/HDFs/st
 # print(myarray.shape)
 # print(myarray)
 
-# subprocess.call(["gdalbuildvrt", "-resolution", "highest", "-separate", "-srcnodata", "-9999", "stacktest6", #Saved in RasterToArray folder
+# subprocess.call(["gdalbuildvrt", "-resolution", "highest", "-separate", "-dsnodata", "-9999", "stacktest6", #Saved in RasterToArray folder
 #     filepath+"MYD04_3K.A2014001.mosaic.061.2018342082532.psmcrpgscs_000501286999.Corrected_Optical_Depth_Land_2.hdf",
 #     filepath+"MYD04_3K.A2014002.mosaic.061.2018342082539.psmcrpgscs_000501286999.Corrected_Optical_Depth_Land_2.hdf",
 #     filepath+"MYD04_3K.A2014003.mosaic.061.2018342082539.psmcrpgscs_000501286999.Corrected_Optical_Depth_Land_2.hdf",
 #     filepath+"MYD04_3K.A2014004.mosaic.061.2018342082553.psmcrpgscs_000501286999.Corrected_Optical_Depth_Land_2.hdf"
 #     ])
+
+row, col = 200, 160  # Arbitrary point in Luzon
 
 with rasterio.open("stacktest6", 'r') as ds:  # Saved in RasterToArray folder
     arr = ds.read()  # read all raster values
@@ -26,23 +28,31 @@ with rasterio.open("stacktest6", 'r') as ds:  # Saved in RasterToArray folder
     bandlist = list(ds.indexes)
     array = np.zeros((len(bandlist), 611, 360))
     array[:, :, :] = ds.read(bandlist)
+
     gt = ds.transform
 
+    ######################################################################################################
+    for val in ds.sample([ds.xy(row-1, col-1, offset='ul')]): 
+        print(val)
+
+    vals = [x for x in ds.sample([ds.xy(row-1, col-1, offset='ul')])]
+    print(vals)
+
+######################################################################################################
 print("Array shape:", arr.shape)  # this is a 3D numpy array, with dimensions [band, row, col]
 print("Source indices:", ds.indexes)
-print("Cell upper left:", ds.xy(0, 0, offset='ul'))  # Centroid offset to one of ul, ur, ll, lr
+print("Cell upper left:", ds.xy(0, 0, offset='ul'))  # Centroid OR offset to one of ul, ur, ll, lr
 print("Source bounds:", ds.bounds)
-row, col = ds.index(ds.bounds.right, ds.bounds.bottom)
-print(row, col)
-
-print(arr[1, row-1, col-1])
-print(array[1, row-1, col-1])
-
-print(gt)
-# a = width of a pixel
-# b = row rotation (typically zero)
-# c = x-coordinate of the upper-left corner of the upper-left pixel
-# d = column rotation (typically zero)
-# e = height of a pixel (typically negative)
-# f = y-coordinate of the of the upper-left corner of the upper-left pixel
-print(gt[0], -gt[4])
+# row, col = ds.index((ds.bounds.left + ds.bounds.right) / 2.0, (ds.bounds.bottom + ds.bounds.top) / 2.0)
+print("# Rows:", row, "#Cols", col)
+print(ds.xy(row, col))
+print("Cell width:", gt[0], "Cell height:", -gt[4])
+# 0 = width of a pixel
+# 1 = row rotation (typically zero)
+# 2 = x-coordinate of the upper-left corner of the upper-left pixel
+# 3 = column rotation (typically zero)
+# 4 = height of a pixel (typically negative)
+# 5 = y-coordinate of the of the upper-left corner of the upper-left pixel
+######################################################################################################
+print("Pixel value:",arr[0, row-1, col-1])
+print("Pixel value2:",array[1, row-1, col-1])
