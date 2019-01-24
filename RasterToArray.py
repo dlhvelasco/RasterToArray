@@ -38,11 +38,11 @@ print(row, col)
 print(arr[1, row-1, col-1])
 print(array[1, row-1, col-1])
 
-print(gt)  
+print(gt)
 # a = width of a pixel
 # b = row rotation (typically zero)
 # c = x-coordinate of the upper-left corner of the upper-left pixel
 # d = column rotation (typically zero)
 # e = height of a pixel (typically negative)
 # f = y-coordinate of the of the upper-left corner of the upper-left pixel
-print(gt[0],-gt[4])
+print(gt[0], -gt[4])
