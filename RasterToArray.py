@@ -36,6 +36,9 @@ with rasterio.open("stacktest6", 'r') as ds:  # Saved in RasterToArray folder
 
     vals2 = [x for x in ds.sample([ds.xy(row-1, col-1, offset='ul')])]
 
+    # coords = ds.xy(row-1, col-1, offset='ul')
+    # vals = ds.sample(coords)
+
 ######################################################################################################
 print("Array shape:", arr.shape)  # this is a 3D numpy array, with dimensions [band, row, col]
 print("Source indices:", ds.indexes)
