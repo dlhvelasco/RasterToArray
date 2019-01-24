@@ -27,12 +27,24 @@ with rasterio.open("stacktest6", 'r') as ds:  # Saved in RasterToArray folder
     array = np.zeros((len(bandlist), 611, 360))
     array[:, :, :] = ds.read(bandlist)
 
+    gt = ds.Affine()
+
 print("Array shape:", arr.shape)  # this is a 3D numpy array, with dimensions [band, row, col]
 print("Source indices:", ds.indexes)
-print("Cell centroid:", ds.xy(0, 0))  # Displays centroid of cell 0,0
+print("Cell upper left:", ds.xy(0, 0, offset='ul'))  # Centroid offset to one of ul, ur, ll, lr
 print("Source bounds:", ds.bounds)
 row, col = ds.index(ds.bounds.right, ds.bounds.bottom)
 print(row, col)
 
 print(arr[1, row-1, col-1])
 print(array[1, row-1, col-1])
+
+print(gt)  
+# a = width of a pixel
+# b = row rotation (typically zero)
+# c = x-coordinate of the upper-left corner of the upper-left pixel
+# d = column rotation (typically zero)
+# e = height of a pixel (typically negative)
+# f = y-coordinate of the of the upper-left corner of the upper-left pixel
+
+print(gt[0],-gt[4])
