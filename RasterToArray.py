@@ -26,8 +26,7 @@ with rasterio.open("stacktest6", 'r') as ds:  # Saved in RasterToArray folder
     bandlist = list(ds.indexes)
     array = np.zeros((len(bandlist), 611, 360))
     array[:, :, :] = ds.read(bandlist)
-
-    gt = ds.Affine()
+    gt = ds.transform
 
 print("Array shape:", arr.shape)  # this is a 3D numpy array, with dimensions [band, row, col]
 print("Source indices:", ds.indexes)
@@ -46,5 +45,4 @@ print(gt)
 # d = column rotation (typically zero)
 # e = height of a pixel (typically negative)
 # f = y-coordinate of the of the upper-left corner of the upper-left pixel
-
 print(gt[0],-gt[4])
