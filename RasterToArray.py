@@ -5,28 +5,31 @@ import matplotlib.pyplot as plt
 from osgeo import gdal
 import subprocess
 
-filepath = "/home/dwight.velasco/dwight.velasco/scratch1/THESIS/MYD04_3K/HDFs/stacktests/"
+filepath = "/home/dwight.velasco/dwight.velasco/scratch1/THESIS/MYD04_3K/datacube/"
 
 # ds = gdal.Open(filepath)
 # myarray = np.array(ds.GetRasterBand(1).ReadAsArray())
 # print(myarray.shape)
 # print(myarray)
 
-# subprocess.call(["gdalbuildvrt", "-resolution", "highest", "-separate", "-dsnodata", "-9999", "stacktest6", #Saved in RasterToArray folder
-#     filepath+"MYD04_3K.A2014001.mosaic.061.2018342082532.psmcrpgscs_000501286999.Corrected_Optical_Depth_Land_2.hdf",
-#     filepath+"MYD04_3K.A2014002.mosaic.061.2018342082539.psmcrpgscs_000501286999.Corrected_Optical_Depth_Land_2.hdf",
-#     filepath+"MYD04_3K.A2014003.mosaic.061.2018342082539.psmcrpgscs_000501286999.Corrected_Optical_Depth_Land_2.hdf",
-#     filepath+"MYD04_3K.A2014004.mosaic.061.2018342082553.psmcrpgscs_000501286999.Corrected_Optical_Depth_Land_2.hdf"
-#     ])
+subprocess.call(["gdalbuildvrt", "-resolution", "highest", "-separate", "stacktest8", #Saved in RasterToArray folder
+    filepath+"MYD04_3K.A2015001.mosaic.061.2019025050128.psmcrpgscs_000501298443.Optical_Depth_Land_And_Ocean.hdf",
+    filepath+"MYD04_3K.A2015002.mosaic.061.2019025050134.psmcrpgscs_000501298443.Optical_Depth_Land_And_Ocean.hdf",
+    filepath+"MYD04_3K.A2015003.mosaic.061.2019025050120.psmcrpgscs_000501298443.Optical_Depth_Land_And_Ocean.hdf",
+    filepath+"MYD04_3K.A2015004.mosaic.061.2019025050135.psmcrpgscs_000501298443.Optical_Depth_Land_And_Ocean.hdf",
+    filepath+"MYD04_3K.A2015005.mosaic.061.2019025050121.psmcrpgscs_000501298443.Optical_Depth_Land_And_Ocean.hdf",
+    filepath+"MYD04_3K.A2015006.mosaic.061.2019025050115.psmcrpgscs_000501298443.Optical_Depth_Land_And_Ocean.hdf",
+    filepath+"MYD04_3K.A2015007.mosaic.061.2019025050123.psmcrpgscs_000501298443.Optical_Depth_Land_And_Ocean.hdf"
+    ])
 
 row, col = 200, 160  # Arbitrary point in Luzon
 
-with rasterio.open("stacktest6", 'r') as ds:  # Saved in RasterToArray folder
+with rasterio.open("stacktest8", 'r') as ds:  # Saved in RasterToArray folder
     arr = ds.read()  # read all raster values
 
     # Same as arr=ds.read()
     bandlist = list(ds.indexes)
-    array = np.zeros((len(bandlist), 611, 360))
+    array = np.zeros((len(bandlist), 610, 359))
     array[:, :, :] = ds.read(bandlist)
 
     ######################################################################################################
