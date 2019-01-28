@@ -93,7 +93,7 @@ aff = ds.transform
 print("\nArray shape:", arr.shape)  # this is a 3D numpy array, with dimensions [band, row, col]
 print("Source indices:", ds.indexes)
 print("Cell upper left:", ds.xy(0, 0, offset='ul'))  # Centroid OR offset to one of ul, ur, ll, lr
-print(aff * (0,0))
+print(aff * (0, 0))
 print("Source bounds:", ds.bounds)
 
 print("Cell width:", aff[0], "Cell height:", -aff[4])
