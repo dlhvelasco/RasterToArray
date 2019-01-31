@@ -28,12 +28,14 @@ scale_factor = 0.0007222299746216393
 offset = 0.5313933787260681
 
 coordinates = [
-    (21.066499495936927, 116.90649816843384)  # upper left (0,0)
+    # (21.066499495936927, 116.90649816843384)  # upper left (0,0)
     # (8.95581, 125.59708),  # lat, lon of CSU Ground, Brgy. Ampayon, Butuan City
     # (8.95499, 125.52679),  # lat, lon of Butuan City ENR Office Compound, Brgy. Doongan, Butuan City.
-    # (15.686770491803276, 121.22516713091922)  # Arbitrary pt in Luzon
+    (15.686770491803276, 121.22516713091922)  # Arbitrary pt in Luzon
 ]
 
+# ERA5_2014_10m_u_component_of_wind.nc
+# stacktest8
 with rasterio.open("ERA5_2014_10m_u_component_of_wind.nc", 'r') as ds:  # Saved in RasterToArray folder
     arr = ds.read()  # read all raster values
 
@@ -75,8 +77,8 @@ with rasterio.open("ERA5_2014_10m_u_component_of_wind.nc", 'r') as ds:  # Saved 
         # Print all bands at a point location
         print(newclip)
 
-        scaledclip = [(x*scale_factor)+offset for x in newclip]  # Int*scale_factor + offset
-        print(scaledclip)
+        # scaledclip = [(x*scale_factor)+offset for x in newclip]  # Int*scale_factor + offset
+        # print(scaledclip)
 
         # print([x for x in ds.sample([ds.xy(px, py, offset='ul')])])
 
@@ -93,7 +95,7 @@ aff = ds.transform
 print("\nArray shape:", arr.shape)  # this is a 3D numpy array, with dimensions [band, row, col]
 print("Source indices:", ds.indexes)
 print("Cell upper left:", ds.xy(0, 0, offset='ul'))  # Centroid OR offset to one of ul, ur, ll, lr
-print(aff * (0, 0))
+print("Cell upper left:", aff * (0, 0))
 print("Source bounds:", ds.bounds)
 
 print("Cell width:", aff[0], "Cell height:", -aff[4])
