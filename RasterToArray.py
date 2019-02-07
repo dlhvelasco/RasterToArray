@@ -2,6 +2,9 @@ import rasterio
 import numpy as np
 # from osgeo import gdal
 import subprocess
+import shapely.speedups
+
+shapely.speedups.enable()
 
 filepath = "/home/dwight.velasco/dwight.velasco/scratch1/THESIS/MYD04_3K/datacube/"
 outfile = r"/home/dwight.velasco/dwight.velasco/scratch1/THESIS/MYD04_3K/datacube/test_{}.hdf"
@@ -22,11 +25,13 @@ outfile = r"/home/dwight.velasco/dwight.velasco/scratch1/THESIS/MYD04_3K/datacub
 #     ])
 
 # row, col = 199, 159  # Arbitrary point in Luzon
+
+# Set scale factor for ERA5
 scale_factor = 0.0007222299746216393
 offset = 0.5313933787260681
 
 coordinates = [
-    # (21.066499495936927, 116.90649816843384)  # upper left (0,0)
+    # (21.12, 114.27)  # upper left (0,0)
     # (8.95581, 125.59708),  # lat, lon of CSU Ground, Brgy. Ampayon, Butuan City
     # (8.95499, 125.52679),  # lat, lon of Butuan City ENR Office Compound, Brgy. Doongan, Butuan City.
     (15.686770491803276, 121.22516713091922)  # Arbitrary pt in Luzon
@@ -39,7 +44,7 @@ with rasterio.open("ERA5_2014_10m_u_component_of_wind.nc", 'r') as ds:  # Saved 
 
     # Same as arr=ds.read()
     bandlist = list(ds.indexes)
-    # array = np.zeros((len(bandlist), 610, 359))
+    # array = np.zeros((len(bandlist), 619, 459))
     array = np.zeros((len(bandlist), arr.shape[1], arr.shape[2]))  #[band, row, col]
     array[:, :, :] = ds.read(bandlist)
 
@@ -91,7 +96,7 @@ with rasterio.open("ERA5_2014_10m_u_component_of_wind.nc", 'r') as ds:  # Saved 
 ######################################################################################################
 aff = ds.transform
 print("\nArray shape:", arr.shape)  # this is a 3D numpy array, with dimensions [band, row, col]
-print("Source indices:", ds.indexes)
+print("Number of dates:", len(ds.indexes))
 print("Cell upper left:", ds.xy(0, 0, offset='ul'))  # Centroid OR offset to one of ul, ur, ll, lr
 print("Cell upper left:", aff * (0, 0))
 print("Source bounds:", ds.bounds)
