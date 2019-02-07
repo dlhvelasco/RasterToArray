@@ -20,10 +20,10 @@ points = gpd.GeoDataFrame(df, geometry='coordinates')
 points.crs = polygons.crs
 sjoin = gpd.tools.sjoin(points, polygons, how='left')
 
-#converting geodataframe to dataframe
+# converting geodataframe to dataframe
 df_sjoin = pd.DataFrame(sjoin)
 # add obs column set to 1 for every hit
-df_sjoin['obs'] = 1
+df_sjoin['fire_spots'] = 1
 
 cumulative_firespots = 0
 
@@ -31,18 +31,17 @@ cumulative_firespots = 0
 grouped = df_sjoin.groupby('acq_date')
 for date, group in grouped:
     print("\nDATE:", date)
-    # sum all hits?
-    counts = group.groupby('index_right')['obs'].sum()
+    # sum all hits
+    counts = group.groupby('index_right')['fire_spots'].sum()
     df2 = pd.DataFrame(counts).reset_index()
     # map index_right values to coordinates of centroid inside cell
     # referencing this coordinate in RasterToArray.py later
     df2['coords'] = list(zip(df2['index_right'].map(df_sjoin.drop_duplicates('index_right').set_index('index_right')['longitude']),
-                    df2['index_right'].map(df_sjoin.drop_duplicates('index_right').set_index('index_right')['latitude'])))
-                    
+                             df2['index_right'].map(df_sjoin.drop_duplicates('index_right').set_index('index_right')['latitude'])))    
     print(df2.head())
     print(len(df2.index)) # len returns number of grids with at least 1 hit for a given day
-    print(df2.obs.sum()) # Sum of total fire spots for a given day
-    cumulative_firespots += df2.obs.sum()
+    print(df2.fire_spots.sum()) # Sum of total fire spots for a given day
+    cumulative_firespots += df2.fire_spots.sum()
 
 ##################################################################
 print("\nTOTAL fire spots:", cumulative_firespots)
