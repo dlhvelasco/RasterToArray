@@ -1,8 +1,6 @@
 import rasterio
 import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
-from osgeo import gdal
+# from osgeo import gdal
 import subprocess
 
 filepath = "/home/dwight.velasco/dwight.velasco/scratch1/THESIS/MYD04_3K/datacube/"
