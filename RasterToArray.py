@@ -9,9 +9,20 @@ filepath = r"/home/dwight.velasco/dwight.velasco/scratch1/THESIS/MYD04_3K/datacu
 outfile = r"/home/dwight.velasco/dwight.velasco/scratch1/THESIS/MYD04_3K/datacube/test_{}.hdf"
 
 ###########################################################################
-subprocess.call(["gdalbuildvrt", "-resolution", "highest", "-separate",
-                "-input_file_list", "MYD043kfileList.txt", "stacktest8.vrt",
-                 ])
+# subprocess.call(["gdalbuildvrt -resolution highest -separate stacktest8.vrt /home/dwight.velasco/dwight.velasco/scratch1/THESIS/MYD04_3K/datacube/*.hdf"
+#                  ], shell=True)
+# BCSMASS DUSMASS25 OCSMASS SO4SMASS SSSMASS25
+###########################################################################
+subprocess.call(["gdalbuildvrt -resolution highest -srcnodata -9999 -sd 1 -separate MerraBCSMASS.vrt /home/dwight.velasco/dwight.velasco/scratch1/THESIS/MERRA_AOD/HDFs/*.hdf",
+                 ], shell=True)
+subprocess.call(["gdalbuildvrt -resolution highest -srcnodata -9999 -sd 2 -separate MerraDUSMASS25.vrt /home/dwight.velasco/dwight.velasco/scratch1/THESIS/MERRA_AOD/HDFs/*.hdf",
+                 ], shell=True)
+subprocess.call(["gdalbuildvrt -resolution highest -srcnodata -9999 -sd 3 -separate MerraOCSMASS.vrt /home/dwight.velasco/dwight.velasco/scratch1/THESIS/MERRA_AOD/HDFs/*.hdf",
+                 ], shell=True)
+subprocess.call(["gdalbuildvrt -resolution highest -srcnodata -9999 -sd 4 -separate MerraSO4SMASS.vrt /home/dwight.velasco/dwight.velasco/scratch1/THESIS/MERRA_AOD/HDFs/*.hdf",
+                 ], shell=True)
+subprocess.call(["gdalbuildvrt -resolution highest -srcnodata -9999 -sd 5 -separate MerraSSSMASS25.vrt /home/dwight.velasco/dwight.velasco/scratch1/THESIS/MERRA_AOD/HDFs/*.hdf",
+                 ], shell=True)
 ###########################################################################
 
 # row, col = 199, 159  # Arbitrary point in Luzon
