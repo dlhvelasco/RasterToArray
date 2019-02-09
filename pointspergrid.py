@@ -7,7 +7,7 @@ import shapely.speedups
 shapely.speedups.enable()
 
 # Read the data.
-polygons = gpd.GeoDataFrame.from_file('/home/dwight.velasco/dwight.velasco/scratch1/THESIS/RasterToArray/modisgrid/clipped.shp')
+polygons = gpd.GeoDataFrame.from_file('/home/dwight.velasco/dwight.velasco/scratch1/THESIS/RasterToArray/modisgrid/clipped-gridifybuffer.shp')
 
 # Point data is from VIIRS 02 Jan 2015 to 03 Jan 2015, containing 212 entries
 df = pd.read_csv(r'/home/dwight.velasco/dwight.velasco/scratch1/THESIS/FIRMS/DL_FIRE_V1_39825/fire_archive_V1_39825.csv')
@@ -46,5 +46,5 @@ for date, group in grouped:
     print(df2.fire_spots.sum())  # Sum of total fire spots for a given day
     cumulative_firespots += df2.fire_spots.sum()
 
-##################################################################
+################################################################## 32651
 print("\nTOTAL fire spots:", cumulative_firespots)

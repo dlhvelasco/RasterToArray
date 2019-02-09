@@ -11,8 +11,8 @@ outfile = r"/home/dwight.velasco/dwight.velasco/scratch1/THESIS/MYD04_3K/datacub
 ###########################################################################
 # subprocess.call(["gdalbuildvrt -resolution highest -separate stacktest8.vrt /home/dwight.velasco/dwight.velasco/scratch1/THESIS/MYD04_3K/datacube/*.hdf"
 #                  ], shell=True)
-# BCSMASS DUSMASS25 OCSMASS SO4SMASS SSSMASS25
 ###########################################################################
+# BCSMASS DUSMASS25 OCSMASS SO4SMASS SSSMASS25
 subprocess.call(["gdalbuildvrt -resolution highest -srcnodata -9999 -sd 1 -separate MerraBCSMASS.vrt /home/dwight.velasco/dwight.velasco/scratch1/THESIS/MERRA_AOD/HDFs/*.hdf",
                  ], shell=True)
 subprocess.call(["gdalbuildvrt -resolution highest -srcnodata -9999 -sd 2 -separate MerraDUSMASS25.vrt /home/dwight.velasco/dwight.velasco/scratch1/THESIS/MERRA_AOD/HDFs/*.hdf",
@@ -39,8 +39,7 @@ coordinates = [
 
 # ERA5_2014_10m_u_component_of_wind.nc
 # stacktest8.vrt
-# MYD043K.hdf
-with rasterio.open("stacktest8.vrt", 'r') as ds:  # Saved in RasterToArray folder
+with rasterio.open("MerraBCSMASS.vrt", 'r') as ds:  # Saved in RasterToArray folder
     arr = ds.read()  # read all raster values
 
     # Same as arr=ds.read()

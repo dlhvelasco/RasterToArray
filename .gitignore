@@ -1,2 +1,3 @@
 rasterio/_base.pyx
-.vscode/launch.json
+.vscode/*
+modisgrid/*
