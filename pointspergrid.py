@@ -7,7 +7,7 @@ import shapely.speedups
 shapely.speedups.enable()
 
 # Read the data.
-polygons = gpd.GeoDataFrame.from_file('/home/dwight.velasco/dwight.velasco/scratch1/THESIS/RasterToArray/modisgrid/clipped-gridifybuffer.shp')
+polygons = gpd.GeoDataFrame.from_file('/home/dwight.velasco/dwight.velasco/scratch1/THESIS/RasterToArray/modisgrid/PHGridmap.shp')
 
 # Point data is from VIIRS 02 Jan 2015 to 03 Jan 2015, containing 212 entries
 df = pd.read_csv(r'/home/dwight.velasco/dwight.velasco/scratch1/THESIS/FIRMS/DL_FIRE_V1_39825/fire_archive_V1_39825.csv')
@@ -41,7 +41,7 @@ for date, group in grouped:
     # referencing this coordinate in RasterToArray.py later
     df2['coords'] = list(zip(df2['index_right'].map(df_sjoin.drop_duplicates('index_right').set_index('index_right')['longitude']),
                              df2['index_right'].map(df_sjoin.drop_duplicates('index_right').set_index('index_right')['latitude'])))
-    print(df2.head())
+    print(df2)
     print(len(df2.index))  # len returns number of grids with at least 1 hit for a given day
     print(df2.fire_spots.sum())  # Sum of total fire spots for a given day
     cumulative_firespots += df2.fire_spots.sum()

@@ -8,23 +8,6 @@ shapely.speedups.enable()
 filepath = r"/home/dwight.velasco/dwight.velasco/scratch1/THESIS/MYD04_3K/datacube/"
 outfile = r"/home/dwight.velasco/dwight.velasco/scratch1/THESIS/MYD04_3K/datacube/test_{}.hdf"
 
-###########################################################################
-# subprocess.call(["gdalbuildvrt -resolution highest -separate stacktest8.vrt /home/dwight.velasco/dwight.velasco/scratch1/THESIS/MYD04_3K/datacube/*.hdf"
-#                  ], shell=True)
-###########################################################################
-# BCSMASS DUSMASS25 OCSMASS SO4SMASS SSSMASS25
-subprocess.call(["gdalbuildvrt -resolution highest -srcnodata -9999 -sd 1 -separate MerraBCSMASS.vrt /home/dwight.velasco/dwight.velasco/scratch1/THESIS/MERRA_AOD/HDFs/*.hdf",
-                 ], shell=True)
-subprocess.call(["gdalbuildvrt -resolution highest -srcnodata -9999 -sd 2 -separate MerraDUSMASS25.vrt /home/dwight.velasco/dwight.velasco/scratch1/THESIS/MERRA_AOD/HDFs/*.hdf",
-                 ], shell=True)
-subprocess.call(["gdalbuildvrt -resolution highest -srcnodata -9999 -sd 3 -separate MerraOCSMASS.vrt /home/dwight.velasco/dwight.velasco/scratch1/THESIS/MERRA_AOD/HDFs/*.hdf",
-                 ], shell=True)
-subprocess.call(["gdalbuildvrt -resolution highest -srcnodata -9999 -sd 4 -separate MerraSO4SMASS.vrt /home/dwight.velasco/dwight.velasco/scratch1/THESIS/MERRA_AOD/HDFs/*.hdf",
-                 ], shell=True)
-subprocess.call(["gdalbuildvrt -resolution highest -srcnodata -9999 -sd 5 -separate MerraSSSMASS25.vrt /home/dwight.velasco/dwight.velasco/scratch1/THESIS/MERRA_AOD/HDFs/*.hdf",
-                 ], shell=True)
-###########################################################################
-
 # row, col = 199, 159  # Arbitrary point in Luzon
 # Set scale factor, offset for ERA5 data
 scale_factor = 0.0007222299746216393
@@ -33,13 +16,14 @@ offset = 0.5313933787260681
 coordinates = [
     # (21.12, 114.27)  # upper left (0,0)
     # (8.95581, 125.59708),  # lat, lon of CSU Ground, Brgy. Ampayon, Butuan City
-    (8.95499, 125.52679),  # lat, lon of Butuan City ENR Office Compound, Brgy. Doongan, Butuan City.
-    (15.686770491803276, 121.22516713091922)  # Arbitrary pt in Luzon
+    # (8.95499, 125.52679),  # lat, lon of Butuan City ENR Office Compound, Brgy. Doongan, Butuan City.
+    # (15.686770491803276, 121.22516713091922)  # Arbitrary pt in Luzon
+    (14.524189999999999, 120.60947) # Petron refinery Index #9554
 ]
 
 # ERA5_2014_10m_u_component_of_wind.nc
 # stacktest8.vrt
-with rasterio.open("MerraBCSMASS.vrt", 'r') as ds:  # Saved in RasterToArray folder
+with rasterio.open("MODIS_AOD4326.vrt", 'r') as ds:  # Saved in RasterToArray folder
     arr = ds.read()  # read all raster values
 
     # Same as arr=ds.read()
