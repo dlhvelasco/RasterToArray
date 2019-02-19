@@ -1,6 +1,6 @@
-<VRTDataset rasterXSize="459" rasterYSize="619" subClass="VRTWarpedDataset">
+<VRTDataset rasterXSize="360" rasterYSize="602" subClass="VRTWarpedDataset">
   <SRS>GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]</SRS>
-  <GeoTransform>  1.1427000000000000e+02,  2.7000000000000000e-02,  0.0000000000000000e+00,  2.1120000000000001e+01,  0.0000000000000000e+00, -2.7000000000000000e-02</GeoTransform>
+  <GeoTransform>  1.1691600000000000e+02,  2.7000000000000000e-02,  0.0000000000000000e+00,  2.0876999999999999e+01,  0.0000000000000000e+00, -2.7000000000000000e-02</GeoTransform>
   <VRTRasterBand dataType="Int16" band="1" subClass="VRTWarpedRasterBand">
     <NoDataValue>-9999</NoDataValue>
   </VRTRasterBand>
@@ -94,7 +94,7 @@
   <VRTRasterBand dataType="Int16" band="31" subClass="VRTWarpedRasterBand">
     <NoDataValue>-9999</NoDataValue>
   </VRTRasterBand>
-  <BlockXSize>459</BlockXSize>
+  <BlockXSize>360</BlockXSize>
   <BlockYSize>128</BlockYSize>
   <GDALWarpOptions>
     <WarpMemoryLimit>6.71089e+07</WarpMemoryLimit>
@@ -109,8 +109,8 @@
           <GenImgProjTransformer>
             <SrcGeoTransform>114.269999999999996,0.0269934640522875822,0,21.120000000000001,0,-0.0269951534733441044</SrcGeoTransform>
             <SrcInvGeoTransform>-4233.24697336561712,37.0460048426150124,0,782.362657091561914,0,-37.0436864153201668</SrcInvGeoTransform>
-            <DstGeoTransform>114.269999999999996,0.0269999999999999997,0,21.120000000000001,0,-0.0269999999999999997</DstGeoTransform>
-            <DstInvGeoTransform>-4232.22222222222172,37.0370370370370381,0,782.222222222222285,0,-37.0370370370370381</DstInvGeoTransform>
+            <DstGeoTransform>116.915999999999997,0.0269999999999999997,0,20.8769999999999989,0,-0.0269999999999999997</DstGeoTransform>
+            <DstInvGeoTransform>-4330.22222222222172,37.0370370370370381,0,773.222222222222172,0,-37.0370370370370381</DstInvGeoTransform>
             <ReprojectTransformer>
               <ReprojectionTransformer>
                 <SourceSRS>GEOGCS["Unknown datum based upon the Clarke 1866 ellipsoid",DATUM["Not specified (based on Clarke 1866 spheroid)",SPHEROID["Clarke 1866",6378206.4,294.9786982138982,AUTHORITY["EPSG","7008"]]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433],EXTENSION["CENTER_LONG",120.465]]</SourceSRS>
