@@ -1,3 +1,5 @@
 rasterio/_base.pyx
 .vscode/*
 modisgrid/*
+Bad examples/*
+__pycache__/*
