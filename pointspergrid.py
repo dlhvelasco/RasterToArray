@@ -21,7 +21,7 @@ df.coordinates = df.coordinates.apply(Point)
 # converting dataframe to geodataframe
 points = gpd.GeoDataFrame(df, geometry='coordinates')
 points.crs = polygons.crs
-sjoin = gpd.tools.sjoin(points, polygons, how='left')
+sjoin = gpd.tools.sjoin(points, polygons, how='left', op='within')
 
 # converting geodataframe to dataframe
 df_sjoin = pd.DataFrame(sjoin)
@@ -42,8 +42,8 @@ for date, group in grouped:
     df2['coords'] = list(zip(df2['index_right'].map(df_sjoin.drop_duplicates('index_right').set_index('index_right')['longitude']),
                              df2['index_right'].map(df_sjoin.drop_duplicates('index_right').set_index('index_right')['latitude'])))
     print(df2)
-    print("# Unique grids:",len(df2.index))  # len returns number of grids with at least 1 hit for a given day
-    print("# Subtotal fire spots:",df2.fire_spots.sum())  # Sum of total fire spots for a given day
+    print("# Unique grids:", len(df2.index))  # len returns number of grids with at least 1 hit for a given day
+    print("# Subtotal fire spots:", df2.fire_spots.sum())  # Sum of total fire spots for a given day
     cumulative_firespots += df2.fire_spots.sum()
 
 ################################################################## 32651
