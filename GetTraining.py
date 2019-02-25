@@ -2,37 +2,51 @@ import pandas as pd
 from datetime import datetime
 import numpy as np
 
-import RasterToArray
 # import GroundPM_allsites
+import RasterToArray
 import pointspergrid
 
-
-csv = pd.read_csv('/home/dwight.velasco/dwight.velasco/scratch1/THESIS/GroundPM/R4B/MIMAROPA_15.csv', header=0)
-csv['datetime'] = pd.to_datetime(csv['Date'])
-csv = csv.set_index('datetime')
-csv.drop(['Date'], axis=1, inplace=True)
+filepath = '/home/dwight.velasco/dwight.velasco/scratch1/THESIS/GroundPM/'
 
 coordinates = [
     # (21.12, 114.27)  # upper left (0,0)
-    (118.73416670000002, 9.7775), # Puerto Princesa
-    # (120.60947, 14.524189999999999) # Petron refinery Index #9554
+    (118.73416670000002, 9.7775, filepath+'R4B/MIMAROPA_15.csv'), # Puerto Princesa (411, 67)
+    (125.52678999999999, 8.954989999999999, filepath+'R13/R13_pms.csv'),  # R13_BUTUAN_PMS(441, 318)
+    # (125.59708, 8.955810000000001),  # R13_BUTUAN_DOAS (441, 321)
+    # (121.09231940000001, 14.6354333) # MARIKINA_ADDITION (231, 154)
+    # (121.0998333,14.6334111) # MANDALUYONG_CITYHALL (231, 154)
 ]
+
+
+def setDatetime(df):
+    df['datetime'] = pd.to_datetime(df['Date'])
+    df = df.set_index('datetime')
+    df.drop(['Date'], axis=1, inplace=True)
+    return df
 
 date_rng = pd.date_range(start='1/1/2015', end='12/31/2018')
 
-for coords in coordinates:
+for cx, cy, csvfile in coordinates:
 
-    listedvals = RasterToArray.RasterToArray(coords).listlistedvals
-    print('\nPixel X, Y coords: {}, {}'.format(RasterToArray.RasterToArray(coords).px, RasterToArray.RasterToArray(coords).py))
-    training = pd.DataFrame(date_rng, columns=['date'])
+    csv = pd.read_csv(csvfile, header=0)
+    csv = setDatetime(csv)
+
+    listedvals = RasterToArray.RasterToArray((cx, cy)).listlistedvals
+    px = RasterToArray.RasterToArray((cx, cy)).px
+    py = RasterToArray.RasterToArray((cx, cy)).py
+    print('\nPixel X, Y coords: {}, {}'.format(px, py))
+
+    training = pd.DataFrame(date_rng, columns=['Date'])
+
+    df_fires = pd.DataFrame(pointspergrid.getFireSpots((px, py)), columns=['Date','fire_spots'])
+    df_fires = setDatetime(df_fires)
 
     training['MODIS_AOD'] = pd.Series(listedvals[0])
     training['ERA5_UWIND'] = pd.Series(listedvals[1])
 
-    training['datetime'] = pd.to_datetime(training['date'])
-    training = training.set_index('datetime')
-    training.drop(['date'], axis=1, inplace=True)
+    training = setDatetime(training)
 
-    training = pd.merge(training,csv, on=['datetime'])
+    training = pd.merge(training, csv,  how='left', on=['datetime'])
+    training = pd.merge(training, df_fires, how='left', on=['datetime'])
 
-    print(training.head(10))
+    print(training.head(31))

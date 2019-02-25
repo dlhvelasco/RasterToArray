@@ -10,6 +10,7 @@ era5_uwind = ('/home/dwight.velasco/dwight.velasco/scratch1/THESIS/ERA5/era5_dat
 
 predictors = [modis_aod, era5_uwind]
 
+
 def RasterToArray(coordinates):
     listlistedvals = []
     for index, (predictor, scale_factor, offset) in enumerate(predictors):
