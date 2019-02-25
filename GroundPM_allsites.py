@@ -1,10 +1,14 @@
 import geopandas as gpd
 import pandas as pd
+pd.set_option('display.max_rows', None) 
 from shapely.geometry import Point
 import geopandas.tools
 import shapely.speedups
-
 shapely.speedups.enable()
+import rasterio
+
+modis_aod =  ('MODIS_AOD4326.vrt') # Reference raster grid
+ds = rasterio.open(modis_aod, 'r')
 
 # Read the data.
 polygons = gpd.GeoDataFrame.from_file('/home/dwight.velasco/dwight.velasco/scratch1/THESIS/RasterToArray/modisgrid/PHGridmap.shp')
@@ -30,6 +34,8 @@ df2 = pd.DataFrame(counts).reset_index()
 # referencing this coordinate in RasterToArray.py later
 df2['coords'] = list(zip(df2['index_right'].map(df_sjoin.drop_duplicates('index_right').set_index('index_right')['longitude']),
                          df2['index_right'].map(df_sjoin.drop_duplicates('index_right').set_index('index_right')['latitude'])))
+                         
+df2['px-py'] = df2['coords'].apply((lambda x: ds.index(x[0],x[-1])))
 
 print(df2)
 print("# Unique grids:", len(df2.index))  # len returns number of grids with at least 1 hit for a given day

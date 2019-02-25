@@ -4,6 +4,7 @@ import numpy as np
 
 import RasterToArray
 # import GroundPM_allsites
+import pointspergrid
 
 
 csv = pd.read_csv('/home/dwight.velasco/dwight.velasco/scratch1/THESIS/GroundPM/R4B/MIMAROPA_15.csv', header=0)
@@ -31,6 +32,7 @@ for coords in coordinates:
     training['datetime'] = pd.to_datetime(training['date'])
     training = training.set_index('datetime')
     training.drop(['date'], axis=1, inplace=True)
+
     training = pd.merge(training,csv, on=['datetime'])
 
     print(training.head(10))
