@@ -5,8 +5,10 @@ import collections
 
 shapely.speedups.enable()
 
-modis_aod =  ('MODIS_AOD4326.vrt', 1, 1)
-era5_uwind = ('/home/dwight.velasco/dwight.velasco/scratch1/THESIS/ERA5/era5_data/10m_u_component_of_wind/ERA5_2015_10m_u_component_of_wind4326.vrt', 0.0007222299746216393, 0.5313933787260681)
+modis_aod = ('MODIS_AOD4326.vrt', 1, 1)
+era5_uwind = ('/home/dwight.velasco/dwight.velasco/scratch1/THESIS/ERA5/era5_data/'
+              '10m_u_component_of_wind/ERA5_2015_10m_u_component_of_wind4326.vrt',
+              0.0007222299746216393, 0.5313933787260681)
 
 predictors = [modis_aod, era5_uwind]
 
@@ -20,18 +22,20 @@ def RasterToArray(coordinates):
         # Obtain row,col given coordinates
         (lon, lat) = coordinates
         px, py = ds.index(lon, lat)  # LON = x, LAT =  y
-        # print('\nPixel X, Y coords: {}, {}'.format(px, py))
 
         # Build an NxN window
-        window = rasterio.windows.Window(py, px, 1, 1)  # py, px is ul corner; 1 x 1 window
+        # py, px is ul corner; 1 x 1 window
+        window = rasterio.windows.Window(py, px, 1, 1)
 
         # Read the data in the window
         # clip is a nbands * N * N numpy array
         clip = ds.read(window=window)
-        scaledclip = [(x*scale_factor)+offset for x in np.squeeze(clip).tolist()]  # Int*scale_factor + offset
+
+        # Int*scale_factor + offset
+        scaledclip = [(x*scale_factor)+offset for x in np.squeeze(clip).tolist()]
 
         listlistedvals.append(scaledclip)
-        ListAndIndex = collections.namedtuple('ListAndIndex', 'listlistedvals,index,px,py')(listlistedvals, index, px, py)
+        ListAndIndex = collections.namedtuple('ListAndIndex', 'listlistedvals, index, px, py')(listlistedvals, index, px, py)
 
     return ListAndIndex
 

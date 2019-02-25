@@ -10,7 +10,7 @@ filepath = '/home/dwight.velasco/dwight.velasco/scratch1/THESIS/GroundPM/'
 
 coordinates = [
     # (21.12, 114.27)  # upper left (0,0)
-    (118.73416670000002, 9.7775, filepath+'R4B/MIMAROPA_15.csv'), # Puerto Princesa (411, 67)
+    (118.73416670000002, 9.7775, filepath+'R4B/MIMAROPA_15.csv'),  # Puerto Princesa (411, 67)
     (125.52678999999999, 8.954989999999999, filepath+'R13/R13_pms.csv'),  # R13_BUTUAN_PMS(441, 318)
     # (125.59708, 8.955810000000001),  # R13_BUTUAN_DOAS (441, 321)
     # (121.09231940000001, 14.6354333) # MARIKINA_ADDITION (231, 154)
@@ -38,7 +38,8 @@ for cx, cy, csvfile in coordinates:
 
     training = pd.DataFrame(date_rng, columns=['Date'])
 
-    df_fires = pd.DataFrame(pointspergrid.getFireSpots((px, py)), columns=['Date','fire_spots'])
+    df_fires = pd.DataFrame(pointspergrid.getFireSpots((px, py)),
+                            columns=['Date', 'fire_spots'])
     df_fires = setDatetime(df_fires)
 
     training['MODIS_AOD'] = pd.Series(listedvals[0])
