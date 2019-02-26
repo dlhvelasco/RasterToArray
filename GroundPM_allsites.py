@@ -9,13 +9,11 @@ pd.set_option('display.max_rows', None)
 shapely.speedups.enable()
 
 
-modis_aod = ('MODIS_AOD4326.tif')  # Reference raster grid
+modis_aod = ('MODIS_REF_GRID.tif')  # Reference raster grid
 ds = rasterio.open(modis_aod, 'r')
 
 # Read the data.
-polygons = gpd.GeoDataFrame.from_file('/home/dwight.velasco/dwight.velasco/'
-                                      'scratch1/THESIS/RasterToArray/'
-                                      'modisgrid/PHGridmap.shp')
+polygons = gpd.read_file("./modisgrid/PHGridmap.shp")
 
 # Point data is from VIIRS 02 Jan 2015 to 03 Jan 2015, containing 212 entries
 df = pd.read_csv(r'/home/dwight.velasco/dwight.velasco/'

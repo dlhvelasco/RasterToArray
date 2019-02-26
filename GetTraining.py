@@ -51,3 +51,4 @@ for cx, cy, csvfile in coordinates:
     training = pd.merge(training, df_fires, how='left', on=['datetime'])
 
     print(training.head(31))
+    print(training.shape)

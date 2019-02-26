@@ -6,35 +6,43 @@ import rasterio
 from shapely.geometry import Point, shape
 import geopandas.tools
 import shapely.speedups
+import pickle
 
 pd.set_option('display.max_rows', None)
 shapely.speedups.enable()
 
-modis_aod = ('MODIS_AOD4326.tif')  # Reference raster grid
+modis_aod = ('MODIS_REF_GRID.tif')  # Reference raster grid
 ds = rasterio.open(modis_aod, 'r')
 
-# Read the data.
-polygons = gpd.read_file("./modisgrid/PHGridmap.shp")
+try:
+        df_sjoin = pd.read_pickle("ppg-df_sjoin.pkl")
+        print("Pickle loaded.")
+except (OSError, IOError) as e:
+        print("No pickle found.")
 
-# /home/dwight.velasco/dwight.velasco/scratch1/THESIS/FIRMS/FIRMS_VIIRS15Day.csv
-df = pd.read_csv(r'/home/dwight.velasco/dwight.velasco/'
-                 'scratch1/THESIS/FIRMS/FIRMS_VIIRS15Day.csv')
-#################################################################
-selected_cols = ['latitude', 'longitude', 'acq_date']
-df = df[selected_cols]
+        # Read the data.
+        polygons = gpd.read_file("./modisgrid/PHGridmap.shp")
 
-# converting longitude & latitude to geometry
-df['coordinates'] = list(zip(df.longitude, df.latitude))
-df.coordinates = df.coordinates.apply(Point)
-# converting dataframe to geodataframe
-points = gpd.GeoDataFrame(df, geometry='coordinates')
-points.crs = polygons.crs
-sjoin = gpd.tools.sjoin(points, polygons, how='left', op='within')
+        # /home/dwight.velasco/dwight.velasco/scratch1/THESIS/FIRMS/FIRMS_VIIRS15Day.csv
+        df = pd.read_csv(r'/home/dwight.velasco/dwight.velasco/'
+                        'scratch1/THESIS/FIRMS/FIRMS_VIIRS1518Day.csv')
+        #################################################################
+        selected_cols = ['latitude', 'longitude', 'acq_date']
+        df = df[selected_cols]
 
-# converting geodataframe to dataframe
-df_sjoin = pd.DataFrame(sjoin)
-# add column set to 1 for every hit
-df_sjoin['fire_spots'] = 1
+        # converting longitude & latitude to geometry
+        df['coordinates'] = list(zip(df.longitude, df.latitude))
+        df.coordinates = df.coordinates.apply(Point)
+        # converting dataframe to geodataframe
+        points = gpd.GeoDataFrame(df, geometry='coordinates')
+        points.crs = polygons.crs
+        sjoin = gpd.tools.sjoin(points, polygons, how='left', op='within')
+
+        # converting geodataframe to dataframe
+        df_sjoin = pd.DataFrame(sjoin)
+        # add column set to 1 for every hit
+        df_sjoin['fire_spots'] = 1
+        df_sjoin.to_pickle("ppg-df_sjoin.pkl", protocol=4)
 
 # Iterate over dates
 grouped = df_sjoin.groupby('acq_date')

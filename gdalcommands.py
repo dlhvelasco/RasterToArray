@@ -13,6 +13,16 @@ import subprocess
 #                  "/home/dwight.velasco/dwight.velasco/scratch1/THESIS/ERA5/era5_data/10m_u_component_of_wind/ERA5_2015_10m_u_component_of_wind4326.vrt"
 #                  ], shell=True)
 ############################################################################
+# subprocess.call(["gdalwarp -t_srs epsg:4326 -te 116.916 4.623 126.636 20.877 -te_srs EPSG:4326 -tr 0.0270 0.0270 "
+#                  "/home/dwight.velasco/dwight.velasco/scratch1/THESIS/MYD04_3K/datacube"
+#                  "/MYD04_3K.A2015001.mosaic.061.2019056093542.psmcrpgscs_000501307718.Corrected_Optical_Depth_Land_2.hdf "
+#                  "MODIS_REF_GRID.tif"
+#                 ], shell=True)
+############################################################################
+# subprocess.call(["gdalwarp -dstnodata -9999 -cutline ./modisgrid/Clean-PHGridmap.shp "
+#                  "MODIS_REF_GRID.tif MODIS_REF_GRID_CUT.tif"
+#                 ], shell=True)
+############################################################################
 # subprocess.call(["gdaldem hillshade /home/dwight.velasco/dwight.velasco/scratch1/THESIS/SRTM/Philippines_SRTM.tif "
 #                  "/home/dwight.velasco/dwight.velasco/scratch1/THESIS/RasterToArray/3dtest2 "
 #                  "-z 3.0 -s 1.1 -az 315.0 -alt 45.0"
