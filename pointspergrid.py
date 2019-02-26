@@ -3,24 +3,20 @@ import numpy as np
 import itertools
 import pandas as pd
 import rasterio
-from shapely.geometry import Point
+from shapely.geometry import Point, shape
 import geopandas.tools
 import shapely.speedups
 
 pd.set_option('display.max_rows', None)
 shapely.speedups.enable()
 
-modis_aod = ('MODIS_AOD4326.vrt')  # Reference raster grid
+modis_aod = ('MODIS_AOD4326.tif')  # Reference raster grid
 ds = rasterio.open(modis_aod, 'r')
 
 # Read the data.
-polygons = gpd.GeoDataFrame.from_file('/home/dwight.velasco/dwight.velasco/'
-                                      'scratch1/THESIS/RasterToArray/'
-                                      'modisgrid/PHGridmap.shp')
+polygons = gpd.read_file("./modisgrid/PHGridmap.shp")
 
 # /home/dwight.velasco/dwight.velasco/scratch1/THESIS/FIRMS/FIRMS_VIIRS15Day.csv
-# /home/dwight.velasco/dwight.velasco/scratch1/THESIS/FIRMS/DL_FIRE_V1_39825/fire_archive_V1_39825.csv
-# Point data is from VIIRS 02 Jan 2015 to 03 Jan 2015, containing 212 entries
 df = pd.read_csv(r'/home/dwight.velasco/dwight.velasco/'
                  'scratch1/THESIS/FIRMS/FIRMS_VIIRS15Day.csv')
 #################################################################

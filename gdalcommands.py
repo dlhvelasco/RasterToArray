@@ -1,11 +1,11 @@
 import subprocess
 
 ###########################################################################
-# subprocess.call(["gdalbuildvrt -resolution highest -separate -overwrite MODIS_AOD.vrt "
-#                  "/home/dwight.velasco/dwight.velasco/scratch1/THESIS/MYD04_3K/datacube/*.hdf"
-#                  ], shell=True)
-# subprocess.call(["gdalwarp -t_srs epsg:4326 -te 116.916 4.623 126.636 20.877 "
-#                  "-te_srs epsg:4326 -tr 0.0270 0.0270 -overwrite MODIS_AOD.vrt MODIS_AOD4326.vrt"
+# subprocess.call(["gdalbuildvrt -resolution highest -separate -overwrite MODIS_AOD.vrt /home/dwight.velasco/dwight.velasco/scratch1/THESIS/MYD04_3K/datacube/*2.hdf"
+#                 ], shell=True)
+# subprocess.call(["gdal_translate -of GTiff -co "TILED=YES" MODIS_AOD.vrt MODIS_AOD.tif"
+#                 ], shell=True) # Run in terminal (source activate thesis & cd to rastertoarray folder)
+# subprocess.call(["gdalwarp -t_srs epsg:4326 -te 116.916 4.623 126.636 20.877 -te_srs EPSG:4326 -tr 0.0270 0.0270 -overwrite MODIS_AOD.tif MODIS_AOD4326.tif"
 #                  ], shell=True)
 # subprocess.call(["gdalwarp -t_srs epsg:4326 -te 116.916 4.623 126.636 20.877 "
 #                  "-te_srs epsg:4326 -tr 0.0270 0.0270 -overwrite "

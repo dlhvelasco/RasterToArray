@@ -9,7 +9,7 @@ pd.set_option('display.max_rows', None)
 shapely.speedups.enable()
 
 
-modis_aod = ('MODIS_AOD4326.vrt')  # Reference raster grid
+modis_aod = ('MODIS_AOD4326.tif')  # Reference raster grid
 ds = rasterio.open(modis_aod, 'r')
 
 # Read the data.

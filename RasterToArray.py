@@ -5,7 +5,7 @@ import collections
 
 shapely.speedups.enable()
 
-modis_aod = ('MODIS_AOD4326.vrt', 1, 1)
+modis_aod = ('MODIS_AOD4326.tif', 1, 1)
 era5_uwind = ('/home/dwight.velasco/dwight.velasco/scratch1/THESIS/ERA5/era5_data/'
               '10m_u_component_of_wind/ERA5_2015_10m_u_component_of_wind4326.vrt',
               0.0007222299746216393, 0.5313933787260681)

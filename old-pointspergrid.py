@@ -1,20 +1,20 @@
 import geopandas as gpd
 import pandas as pd
-pd.set_option('display.max_rows', None) 
+pd.set_option('display.max_rows', None)
 from shapely.geometry import Point
 import geopandas.tools
 import shapely.speedups
 shapely.speedups.enable()
 import rasterio
 
-modis_aod =  ('MODIS_AOD4326.vrt') # Reference raster grid
+modis_aod =  ('MODIS_AOD4326.tif') # Reference raster grid
 ds = rasterio.open(modis_aod, 'r')
 
 # Read the data.
-polygons = gpd.GeoDataFrame.from_file('/home/dwight.velasco/dwight.velasco/scratch1/THESIS/RasterToArray/modisgrid/PHGridmap.shp')
+polygons = gpd.read_file('/home/dwight.velasco/dwight.velasco/scratch1/THESIS/RasterToArray/modisgrid/PHGridmap.shp')
 
 # Point data is from VIIRS 02 Jan 2015 to 03 Jan 2015, containing 212 entries
-df = pd.read_csv(r'/home/dwight.velasco/dwight.velasco/scratch1/THESIS/FIRMS/DL_FIRE_V1_39825/fire_archive_V1_39825.csv')
+df = pd.read_csv(r'/home/dwight.velasco/dwight.velasco/scratch1/THESIS/FIRMS/FIRMS_VIIRS15Day.csv')
 #################################################################
 selected_cols = ['latitude', 'longitude', 'acq_date']
 df = df[selected_cols]
