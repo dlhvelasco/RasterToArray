@@ -1,10 +1,9 @@
 import geopandas as gpd
+import geopandas.tools
 import numpy as np
-import itertools
 import pandas as pd
 import rasterio
 from shapely.geometry import Point, shape
-import geopandas.tools
 import shapely.speedups
 import pickle
 
@@ -25,7 +24,7 @@ except (OSError, IOError) as e:
 
         # /home/dwight.velasco/dwight.velasco/scratch1/THESIS/FIRMS/FIRMS_VIIRS15Day.csv
         df = pd.read_csv(r'/home/dwight.velasco/dwight.velasco/'
-                        'scratch1/THESIS/FIRMS/FIRMS_VIIRS1518Day.csv')
+                         'scratch1/THESIS/FIRMS/FIRMS_VIIRS1518Day.csv')
         #################################################################
         selected_cols = ['latitude', 'longitude', 'acq_date']
         df = df[selected_cols]

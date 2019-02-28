@@ -3,12 +3,11 @@ import subprocess
 ###########################################################################
 # subprocess.call(["gdalbuildvrt -resolution highest -separate -overwrite MODIS_AOD.vrt /home/dwight.velasco/dwight.velasco/scratch1/THESIS/MYD04_3K/datacube/*2.hdf"
 #                 ], shell=True)
-# subprocess.call(["gdal_translate -of GTiff -co "TILED=YES" MODIS_AOD.vrt MODIS_AOD.tif"
-#                 ], shell=True) # Run in terminal (source activate thesis & cd to rastertoarray folder)
-# subprocess.call(["gdalwarp -t_srs epsg:4326 -te 116.916 4.623 126.636 20.877 -te_srs EPSG:4326 -tr 0.0270 0.0270 -overwrite MODIS_AOD.tif MODIS_AOD4326.tif"
-#                  ], shell=True)
+# gdal_translate  --config GDAL_CACHEMAX 512 -of GTiff -co "TILED=YES" -co NUM_THREADS=ALL_CPUS MODIS_AOD.vrt /vsistdout/ | gdalwarp -t_srs epsg:4326 -te 116.916 4.623 126.636 20.877 -te_srs EPSG:4326 -tr 0.0270 0.0270 -multi -wo NUM_THREADS=ALL_CPUS -overwrite /vsistdin/ MODIS_AOD4326.tif"
+# # Run in terminal (source activate thesis & cd to rastertoarray folder)
+#
 # subprocess.call(["gdalwarp -t_srs epsg:4326 -te 116.916 4.623 126.636 20.877 "
-#                  "-te_srs epsg:4326 -tr 0.0270 0.0270 -overwrite "
+#                  "-te_srs epsg:4326 -tr 0.0270 0.0270 -multi -wo NUM_THREADS=ALL_CPUS -overwrite "
 #                  "/home/dwight.velasco/dwight.velasco/scratch1/THESIS/ERA5/era5_data/10m_u_component_of_wind/ERA5_2015_10m_u_component_of_wind.nc "
 #                  "/home/dwight.velasco/dwight.velasco/scratch1/THESIS/ERA5/era5_data/10m_u_component_of_wind/ERA5_2015_10m_u_component_of_wind4326.vrt"
 #                  ], shell=True)
@@ -20,7 +19,7 @@ import subprocess
 #                 ], shell=True)
 ############################################################################
 # subprocess.call(["gdalwarp -dstnodata -9999 -cutline ./modisgrid/Clean-PHGridmap.shp "
-#                  "MODIS_REF_GRID.tif MODIS_REF_GRID_CUT.tif"
+#                  "-multi -wo NUM_THREADS=ALL_CPUS MODIS_REF_GRID.tif MODIS_REF_GRID_CUT.tif"
 #                 ], shell=True)
 ############################################################################
 # subprocess.call(["gdaldem hillshade /home/dwight.velasco/dwight.velasco/scratch1/THESIS/SRTM/Philippines_SRTM.tif "
@@ -28,7 +27,7 @@ import subprocess
 #                  "-z 3.0 -s 1.1 -az 315.0 -alt 45.0"
 #                  ], shell=True)
 ###########################################################################
-# # BCSMASS DUSMASS25 OCSMASS SO4SMASS SSSMASS25
+# BCSMASS DUSMASS25 OCSMASS SO4SMASS SSSMASS25
 # subprocess.call(["gdalbuildvrt -resolution highest -srcnodata -9999 -sd 1 -separate MerraBCSMASS.vrt "
 #                  "/home/dwight.velasco/dwight.velasco/scratch1/THESIS/MERRA_AOD/HDFs/*.hdf",
 #                  ], shell=True)
@@ -45,3 +44,8 @@ import subprocess
 #                  "/home/dwight.velasco/dwight.velasco/scratch1/THESIS/MERRA_AOD/HDFs/*.hdf",
 #                  ], shell=True)
 ###########################################################################
+# gdal_translate  --config GDAL_CACHEMAX 512 -of GTiff -co "TILED=YES" -co NUM_THREADS=ALL_CPUS MerraBCSMASS.vrt /vsistdout/ | gdalwarp -t_srs epsg:4326 -te 116.916 4.623 126.636 20.877 -te_srs EPSG:4326 -tr 0.0270 0.0270 -multi -wo NUM_THREADS=ALL_CPUS -overwrite /vsistdin/ MerraBCSMASS.tif
+# gdal_translate  --config GDAL_CACHEMAX 512 -of GTiff -co "TILED=YES" -co NUM_THREADS=ALL_CPUS MerraDUSMASS25.vrt /vsistdout/ | gdalwarp -t_srs epsg:4326 -te 116.916 4.623 126.636 20.877 -te_srs EPSG:4326 -tr 0.0270 0.0270 -multi -wo NUM_THREADS=ALL_CPUS -overwrite /vsistdin/ MerraDUSMASS25.tif
+# gdal_translate  --config GDAL_CACHEMAX 512 -of GTiff -co "TILED=YES" -co NUM_THREADS=ALL_CPUS MerraOCSMASS.vrt /vsistdout/ | gdalwarp -t_srs epsg:4326 -te 116.916 4.623 126.636 20.877 -te_srs EPSG:4326 -tr 0.0270 0.0270 -multi -wo NUM_THREADS=ALL_CPUS -overwrite /vsistdin/ MerraOCSMASS.tif
+# gdal_translate  --config GDAL_CACHEMAX 512 -of GTiff -co "TILED=YES" -co NUM_THREADS=ALL_CPUS MerraSO4SMASS.vrt /vsistdout/ | gdalwarp -t_srs epsg:4326 -te 116.916 4.623 126.636 20.877 -te_srs EPSG:4326 -tr 0.0270 0.0270 -multi -wo NUM_THREADS=ALL_CPUS -overwrite /vsistdin/ MerraSO4SMASS.tif
+# gdal_translate  --config GDAL_CACHEMAX 512 -of GTiff -co "TILED=YES" -co NUM_THREADS=ALL_CPUS MerraSSSMASS25.vrt /vsistdout/ | gdalwarp -t_srs epsg:4326 -te 116.916 4.623 126.636 20.877 -te_srs EPSG:4326 -tr 0.0270 0.0270 -multi -wo NUM_THREADS=ALL_CPUS -overwrite /vsistdin/ MerraSSSMASS25.tif

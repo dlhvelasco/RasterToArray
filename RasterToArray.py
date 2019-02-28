@@ -5,12 +5,18 @@ import collections
 
 shapely.speedups.enable()
 
-modis_aod = ('MODIS_AOD4326.tif', 1, 1)
+# (filename , scale factor, offset)
+modis_aod = ('MODIS_AOD4326.tif', 1, 0)
 era5_uwind = ('/home/dwight.velasco/dwight.velasco/scratch1/THESIS/ERA5/era5_data/'
               '10m_u_component_of_wind/ERA5_2015_10m_u_component_of_wind4326.vrt',
-              0.0007222299746216393, 0.5313933787260681)
+              0.0009861741889582347, -0.4754686730319791)
+merra_bcs = ('MerraBCSMASS.tif',1,0)
+merra_dus = ('MerraDUSMASS25.tif',1,0)
+merra_ocs = ('MerraOCSMASS.tif',1,0)
+merra_so4 = ('MerraSO4SMASS.tif',1,0)
+merra_sss = ('MerraSSSMASS25.tif',1,0)
 
-predictors = [modis_aod, era5_uwind]
+predictors = [modis_aod, era5_uwind, merra_bcs, merra_dus, merra_ocs, merra_so4, merra_sss]
 
 
 def RasterToArray(coordinates):

@@ -6,6 +6,9 @@ import numpy as np
 import RasterToArray
 import pointspergrid
 
+pd.set_option('display.max_rows', None)
+pd.set_option('display.max_columns', None)
+
 filepath = '/home/dwight.velasco/dwight.velasco/scratch1/THESIS/GroundPM/'
 
 coordinates = [
@@ -44,11 +47,19 @@ for cx, cy, csvfile in coordinates:
 
     training['MODIS_AOD'] = pd.Series(listedvals[0])
     training['ERA5_UWIND'] = pd.Series(listedvals[1])
+    training['MERRA_BCS'] = pd.Series(listedvals[2])
+    training['MERRA_DUS'] = pd.Series(listedvals[3])
+    training['MERRA_OCS'] = pd.Series(listedvals[4])
+    training['MERRA_SO4'] = pd.Series(listedvals[5])
+    training['MERRA_SSS'] = pd.Series(listedvals[6])
+    training['MERRA_PM2.5'] = 100000000*(training.MERRA_BCS + training.MERRA_DUS + 1.8*training.MERRA_OCS + 1.375*training.MERRA_SO4 + training.MERRA_SSS)
+    # training['MERRA_PM2.5'] = pd.Series(100000000*[a + b + (1.8*c) + (1.375*d) + e for a, b, c, d, e in zip(*listedvals[2:])])  # MemoryError
+    training.drop(['MERRA_BCS', 'MERRA_DUS', 'MERRA_OCS', 'MERRA_SO4', 'MERRA_SSS'], axis=1, inplace=True)
 
     training = setDatetime(training)
 
     training = pd.merge(training, csv,  how='left', on=['datetime'])
     training = pd.merge(training, df_fires, how='left', on=['datetime'])
 
-    print(training.head(31))
-    print(training.shape)
+    print(training.head(7))
+    print("Array shape:", training.shape)

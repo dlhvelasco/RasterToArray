@@ -3,3 +3,6 @@ rasterio/_base.pyx
 modisgrid/*
 Bad examples/*
 __pycache__/*
+*.pkl
+*.xml
+*.tif
