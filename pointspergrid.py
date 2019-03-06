@@ -17,12 +17,11 @@ try:
         df_sjoin = pd.read_pickle("ppg-df_sjoin.pkl")
         print("Pickle loaded.")
 except (OSError, IOError) as e:
-        print("No pickle found.")
+        print("No pickle found. Creating pickle...")
 
         # Read the data.
-        polygons = gpd.read_file("./modisgrid/PHGridmap.shp")
+        polygons = gpd.read_file("./modisgrid/Clean-PHGridmap.shp")
 
-        # /home/dwight.velasco/dwight.velasco/scratch1/THESIS/FIRMS/FIRMS_VIIRS15Day.csv
         df = pd.read_csv(r'/home/dwight.velasco/dwight.velasco/'
                          'scratch1/THESIS/FIRMS/FIRMS_VIIRS1518Day.csv')
         #################################################################
@@ -35,13 +34,18 @@ except (OSError, IOError) as e:
         # converting dataframe to geodataframe
         points = gpd.GeoDataFrame(df, geometry='coordinates')
         points.crs = polygons.crs
-        sjoin = gpd.tools.sjoin(points, polygons, how='left', op='within')
+
+        poly_mask = polygons.unary_union
+        points_clip = points[points.geometry.within(poly_mask)]
+
+        sjoin = gpd.tools.sjoin(points_clip, polygons, how='left', op='within')
 
         # converting geodataframe to dataframe
         df_sjoin = pd.DataFrame(sjoin)
         # add column set to 1 for every hit
         df_sjoin['fire_spots'] = 1
         df_sjoin.to_pickle("ppg-df_sjoin.pkl", protocol=4)
+        print("Pickle created.")
 
 # Iterate over dates
 grouped = df_sjoin.groupby('acq_date')
@@ -49,6 +53,7 @@ grouped = df_sjoin.groupby('acq_date')
 
 def getFireSpots(pxpy):
     fire_spots_list = []
+    print("Obtaining fire spots...")
     for date, group in grouped:
         # sum all hits
         counts = group.groupby('index_right')['fire_spots'].sum()
@@ -68,5 +73,5 @@ def getFireSpots(pxpy):
                                   .values.tolist())
 
     fire_spots_list = [None if not x else (date, x[0]) for x in fire_spots_list]
-
+    print("Fire spots obtained.")
     return list(filter(None, fire_spots_list))

@@ -13,9 +13,8 @@ modis_aod = ('MODIS_REF_GRID.tif')  # Reference raster grid
 ds = rasterio.open(modis_aod, 'r')
 
 # Read the data.
-polygons = gpd.read_file("./modisgrid/PHGridmap.shp")
+polygons = gpd.read_file("./modisgrid/Clean-PHGridmap.shp")
 
-# Point data is from VIIRS 02 Jan 2015 to 03 Jan 2015, containing 212 entries
 df = pd.read_csv(r'/home/dwight.velasco/dwight.velasco/'
                  'scratch1/THESIS/GroundPM/GroundPM_allsites.txt')
 #################################################################

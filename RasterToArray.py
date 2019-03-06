@@ -5,23 +5,56 @@ import collections
 
 shapely.speedups.enable()
 
+filename = '/home/dwight.velasco/dwight.velasco/scratch1/THESIS/'
+era5files = 'ERA5/era5_data/'
+
 # (filename , scale factor, offset)
 modis_aod = ('MODIS_AOD4326.tif', 1, 0)
-era5_uwind = ('/home/dwight.velasco/dwight.velasco/scratch1/THESIS/ERA5/era5_data/'
-              '10m_u_component_of_wind/ERA5_2015_10m_u_component_of_wind4326.vrt',
-              0.0009861741889582347, -0.4754686730319791)
-merra_bcs = ('MerraBCSMASS.tif',1,0)
-merra_dus = ('MerraDUSMASS25.tif',1,0)
-merra_ocs = ('MerraOCSMASS.tif',1,0)
-merra_so4 = ('MerraSO4SMASS.tif',1,0)
-merra_sss = ('MerraSSSMASS25.tif',1,0)
 
-predictors = [modis_aod, era5_uwind, merra_bcs, merra_dus, merra_ocs, merra_so4, merra_sss]
+uwind = (filename + era5files
+                + '10m_u_component_of_wind/1518.tif',
+                -0.000982028765824807, -0.1684722900390625)      
+vwind = (filename + era5files
+                + '10m_v_component_of_wind/1518.tif',
+                -0.0009774566242446439, 1.620666503906254)
+2m_dew_temp = (filename + era5files
+                + '2m_dewpoint_temperature/1518.tif',
+                -0.0003536633939334981, 291.74853515625)
+surface_pressure = (filename + era5files
+                + 'surface_pressure/1518.tif',
+                -0.2986708783495086, 93481.25)
+# total_cloud_cover = (filename + era5files
+#                 + 'total_cloud_cover/1518.tif',
+#                 -0.00001525983668692472, 0.5000038088837755)
+high_cloud_cover = (filename + era5files
+                + 'high_cloud_cover/1518.tif',
+                -0.00001525983618218653, 0.5000037923455238)
+low_cloud_cover = (filename + era5files
+                + 'low_cloud_cover/1518.tif',
+                -0.00001525983601186792, 0.5000037867648643)
+total_precipitation = (filename + era5files
+                + 'total_precipitation/1518.tif',
+                -0.0000006253776231295517, 0.02049112319946289)
+evaporation = (filename + era5files
+                + 'evaporation/1518.tif',
+                -0.00000002996853203093483, -0.0009725653799250722)
+boundary_layer_height = (filename + era5files
+                + 'boundary_layer_height/1518.tif',
+                -0.04024812271908905, 1338.976196289062)
+
+
+merra_pm25 = ('MerraPM25.tif', 1, 0)
+
+predictors = [modis_aod, merra_pm25,
+              uwind, vwind, 2m_dew_temp, surface_pressure, high_cloud_cover, low_cloud_cover, total_precipitation, evaporation, boundary_layer_height
+             ]
 
 
 def RasterToArray(coordinates):
+    print("Obtaining array from raster...")
     listlistedvals = []
     for index, (predictor, scale_factor, offset) in enumerate(predictors):
+        print("Processing array: {}/{}".format(index,len(predictors)))
         ds = rasterio.open(predictor, 'r')  # Saved in RasterToArray folder
         arr = ds.read()  # read all raster values
 
@@ -42,7 +75,7 @@ def RasterToArray(coordinates):
 
         listlistedvals.append(scaledclip)
         ListAndIndex = collections.namedtuple('ListAndIndex', 'listlistedvals, index, px, py')(listlistedvals, index, px, py)
-
+    
     return ListAndIndex
 
 ###############################################################################
