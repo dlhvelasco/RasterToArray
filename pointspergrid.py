@@ -8,6 +8,7 @@ import shapely.speedups
 import pickle
 
 pd.set_option('display.max_rows', None)
+pd.set_option('display.max_columns', None)
 shapely.speedups.enable()
 
 modis_aod = ('MODIS_REF_GRID.tif')  # Reference raster grid
