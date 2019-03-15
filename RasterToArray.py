@@ -1,5 +1,6 @@
 import rasterio
 import numpy as np
+import pandas as pd
 import shapely.speedups
 import collections
 
@@ -21,8 +22,8 @@ vwind = (filename + era5files +
          '10m_v_component_of_wind/1518c.tif',
          -0.0009774566242446439, 1.620666503906254)
 dewpt_temp = (filename + era5files +
-               '2m_dewpoint_temperature/1518c.tif',
-               -0.0003536633939334981, 291.74853515625)
+              '2m_dewpoint_temperature/1518c.tif',
+              -0.0003536633939334981, 291.74853515625)
 air_temp = (filename + era5files +
             '2m_temperature/1518c.tif',
             -0.0004249399983023561, 298.565185546875)
@@ -54,9 +55,26 @@ boundary_layer_height = (filename + era5files +
                          'boundary_layer_height/1518c.tif',
                          -0.04024812271908905, 1338.976196289062)
 
+rel_humidity_875 = (filename + era5files +
+                         'relative_humidity_875hPa/1518c.tif',
+                         -0.001730378407709606, 54.88664960861206)
+spec_humidity_875 = (filename + era5files +
+                         'specific_humidity_875hPa/1518c.tif',
+                         -0.0000003084281710785916, 0.010109911496329)
+temp_875 = (filename + era5files +
+                         'temperature_875hPa/1518c.tif',
+                         -0.0004012233527131783, 286.4755859375)
+uwind_875 = (filename + era5files +
+                         'u_component_of_wind_875hPa/1518c.tif',
+                         -0.00175793767739425, -0.3765716552734339)
+vwind_875 = (filename + era5files +
+                         'v_component_of_wind_875hPa/1518c.tif',
+                         -0.001764441965584323, 3.449600219726562)
+
 predictors = [modis_aod, merra_pm25,
-              uwind, vwind, dewpt_temp, air_temp, surface_pressure, high_cloud_cover, low_cloud_cover, 
+              uwind, vwind, dewpt_temp, air_temp, surface_pressure, high_cloud_cover, low_cloud_cover,
               surface_net_solar_radiation, surface_net_thermal_radiation, total_precipitation, evaporation, boundary_layer_height,
+              rel_humidity_875, spec_humidity_875, temp_875, uwind_875, vwind_875,
               omi_no2, modis_lst
               ]
 
@@ -69,7 +87,7 @@ def RasterToArray():
         ds = rasterio.open(predictor, 'r')  # Saved in RasterToArray folder
 
         listlistedvals.append(ds)
-    
+
     return listlistedvals
 
 
@@ -77,7 +95,7 @@ def GetPixelValue(dsstore, coordinates):
     print("Obtaining pixel values for coordinate...")
     listlistedvals = []
     for index, (predictor, scale_factor, offset) in enumerate(predictors):
-        print("Processing predictor: {}/{}".format(index+1, len(predictors)))
+        # print("Processing predictor: {}/{}".format(index+1, len(predictors)))
         ds = dsstore[index]
 
         # Obtain row,col given coordinates
@@ -100,21 +118,32 @@ def GetPixelValue(dsstore, coordinates):
 
     return ListAndIndex
 
-pop15 = (filename + 'LandScan/2015c.tif', 1, 0)
-pop16 = (filename + 'LandScan/2016c.tif', 1, 0)
-pop17 = (filename + 'LandScan/2017c.tif', 1, 0)
+# (filename , scale factor, offset, timestep)
+population = (filename + 'LandScan/Population.tif', 1, 0, '1/1/2015', 'AS')
+modis_evi = (filename + 'MYD13C1/MODIS_EVI4326.tif', 10000, 0, '12/27/2014', '16D')
 
-years = [pop15, pop16, pop17]
+predictors2 = [population, modis_evi]
 
 
-def RasterToArrayDate(coordinates):
+def RasterToArrayDate():
+    print("Obtaining array from raster...")
+    listlistedvals = []
+    for index, (predictor, scale_factor, offset, startdate, timestep) in enumerate(predictors2):
+        print("Processing year: {}/{}".format(index+1, len(predictors2)))
+        ds = rasterio.open(predictor, 'r')  # Saved in RasterToArray folder
+
+        listlistedvals.append(ds)
+
+    return listlistedvals
+
+def GetPixelValueDate(dsstoreDate, coordinates):
     print("Obtaining array from raster...")
     listlistedvals = []
     listlisteddates = []
-    for index, (predictor, scale_factor, offset) in enumerate(years):
-        print("Processing year: {}/{}".format(index+1, len(years)))
-        ds = rasterio.open(predictor, 'r')  # Saved in RasterToArray folder
-        arr = ds.read()  # read all raster values
+    for index, (predictor, scale_factor, offset, startdate, timestep) in enumerate(predictors2):
+        dateslist = pd.date_range(start='1/1/2015', end='12/31/2018', freq=timestep).strftime('%Y-%m-%d').tolist()
+
+        ds = dsstoreDate[index]  # read all raster values
 
         # Obtain row,col given coordinates
         (lon, lat) = coordinates
@@ -127,10 +156,13 @@ def RasterToArrayDate(coordinates):
         # Read the data in the window
         # clip is a nbands * N * N numpy array
         clip = ds.read(window=window)
+        scaledclip = [(x*scale_factor)+offset for x in np.squeeze(clip).tolist()]
 
-        listlistedvals.append(clip)
-        
-        listlisteddates.append(int(float(predictor[-9:-5]))) # Takes year
+        listlistedvals.append(scaledclip)
+        listlisteddates.append(dateslist)
+
+        # print(np.shape(listlistedvals))
+        # print(np.shape(listlisteddates))
 
         ListAndDate = collections.namedtuple('ListAndDate', 'listlistedvals, listlisteddates')(listlistedvals, listlisteddates)
 
