@@ -16,7 +16,7 @@ ds = rasterio.open(modis_aod, 'r')
 polygons = gpd.read_file("./modisgrid/Clean-PHGridmap.shp")
 
 df = pd.read_csv(r'/home/dwight.velasco/dwight.velasco/'
-                 'scratch1/THESIS/GroundPM/GroundPM_allsites.txt')
+                'scratch1/THESIS/GroundPM/GroundPM_allsites.txt')
 #################################################################
 # converting longitude & latitude to geometry
 df['coordinates'] = list(zip(df.longitude, df.latitude))
@@ -35,11 +35,11 @@ df2 = pd.DataFrame(counts).reset_index()
 # map index_right values to coordinates of centroid inside cell
 # referencing this coordinate in RasterToArray.py later
 df2['coords'] = list(zip(df2['index_right']
-                     .map(df_sjoin.drop_duplicates('index_right')
-                     .set_index('index_right')['longitude']),
-                     df2['index_right']
-                     .map(df_sjoin.drop_duplicates('index_right')
-                     .set_index('index_right')['latitude'])))
+                    .map(df_sjoin.drop_duplicates('index_right')
+                    .set_index('index_right')['longitude']),
+                    df2['index_right']
+                    .map(df_sjoin.drop_duplicates('index_right')
+                    .set_index('index_right')['latitude'])))
 df2['px-py'] = df2['coords'].apply((lambda x: ds.index(x[0], x[-1])))
 
 print(df2)

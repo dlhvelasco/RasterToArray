@@ -1,10 +1,9 @@
 import subprocess
 from osgeo import gdal
 import glob
- 
 
 ###########################################################################
-# REPROJECT MODIS
+# *REPROJECT MODIS
 # subprocess.call(["gdalbuildvrt -resolution highest -separate -overwrite MODIS_AOD.vrt /home/dwight.velasco/dwight.velasco/scratch1/THESIS/MYD04_3K/datacube/*2.hdf"
 #                 ], shell=True)
 #
@@ -14,20 +13,20 @@ import glob
 
 
 ############################################################################
-# REPROJECT ERA5 (command-line)
+# *REPROJECT ERA5 (command-line)
 # gdalwarp -t_srs epsg:4326 -te 116.916 4.623 126.636 20.877 -te_srs epsg:4326 -tr 0.0270 0.0270 -multi -wo NUM_THREADS=ALL_CPUS -overwrite fl_out /vsistdout/ | gdal_translate  --config GDAL_CACHEMAX 2048 -of GTiff -co "TILED=YES" -co NUM_THREADS=ALL_CPUS /vsistdin/ 1518.tif
 #
 ############################################################################
 
 
 ############################################################################
-# CUTLINE
+# *CUTLINE
 # gdalwarp -multi -wo NUM_THREADS=ALL_CPUS -overwrite -srcnodata -32767 -dstnodata -32767 -crop_to_cutline -cutline /home/dwight.velasco/dwight.velasco/scratch1/THESIS/RasterToArray/modisgrid/Clean-PHGridmap.shp 1518.tif 1518c.tif
 ############################################################################
 
 
 ############################################################################
-# MODIS REFERENCE GRID
+# *MODIS REFERENCE GRID
 # subprocess.call(["gdalwarp -t_srs epsg:4326 -te 116.916 4.623 126.636 20.877 -te_srs EPSG:4326 -tr 0.0270 0.0270 "
 #                  "/home/dwight.velasco/dwight.velasco/scratch1/THESIS/MYD04_3K/datacube"
 #                  "/MYD04_3K.A2015001.mosaic.061.2019056093542.psmcrpgscs_000501307718.Corrected_Optical_Depth_Land_2.hdf "
@@ -37,7 +36,7 @@ import glob
 
 
 ############################################################################
-# HILLSHADE DEM
+# *HILLSHADE DEM
 # subprocess.call(["gdaldem hillshade /home/dwight.velasco/dwight.velasco/scratch1/THESIS/SRTM/Philippines_SRTM.tif "
 #                  "/home/dwight.velasco/dwight.velasco/scratch1/THESIS/RasterToArray/3dtest2 "
 #                  "-z 3.0 -s 1.1 -az 315.0 -alt 45.0"
@@ -46,7 +45,7 @@ import glob
 
 
 ############################################################################
-# MERRA-2
+# *MERRA-2
 # BCSMASS DUSMASS25 OCSMASS SO4SMASS SSSMASS25
 # subprocess.call(["gdalbuildvrt -resolution highest -srcnodata -9999 -sd 1 -separate -overwrite MerraBCSMASS.vrt "
 #                  "/home/dwight.velasco/dwight.velasco/scratch1/THESIS/MERRA_AOD/HDFs2/*.hdf",
@@ -75,7 +74,7 @@ import glob
 
 
 ############################################################################
-# OMI NO2Trop
+# *OMI NO2Trop
 # gdalbuildvrt -resolution highest -srcnodata -1267650600000000000000000000000 -sd 1 -separate -overwrite OMINO2.vrt /home/dwight.velasco/dwight.velasco/scratch1/THESIS/OMI/NO2Trop/*.he5
 # && gdal_translate --config GDAL_CACHEMAX 1024 -of GTiff -a_srs EPSG:4326 -a_ullr 116.916 4.623 126.636 20.877 -co NUM_THREADS=ALL_CPUS OMINO2.vrt OMINO2.tif
 # && gdalwarp -s_srs EPSG:4326 -srcnodata -1267650600000000000000000000000 -dstnodata -1267650600000000000000000000000 -t_srs epsg:4326 -te 116.916 4.623 126.636 20.877 -te_srs EPSG:4326 -tr 0.0270 0.0270 -multi -wo NUM_THREADS=ALL_CPUS -overwrite OMINO2.tif OMINO2b.tif
@@ -84,7 +83,7 @@ import glob
 
 
 ############################################################################
-# Landscan
+# *Landscan
 # gdalwarp -multi -wo NUM_THREADS=ALL_CPUS -wo CUTLINE_ALL_TOUCHED=TRUE -overwrite -srcnodata -2147483647 -dstnodata -2147483647 -crop_to_cutline -cutline  /home/dwight.velasco/dwight.velasco/scratch1/THESIS/RasterToArray/modisgrid/Clean-PHGridmap.shp 2015.tif 2015b.tif && gdalwarp -s_srs EPSG:4326 -srcnodata -2147483647 -dstnodata -2147483647 -t_srs epsg:4326 -te 116.916 4.623 126.636 20.877 -te_srs EPSG:4326 -tr 0.0270 0.0270 -r bilinear -multi -wo NUM_THREADS=ALL_CPUS -overwrite 2015b.tif 2015c.tif
 # gdalwarp -multi -wo NUM_THREADS=ALL_CPUS -wo CUTLINE_ALL_TOUCHED=TRUE -overwrite -srcnodata -2147483647 -dstnodata -2147483647 -crop_to_cutline -cutline  /home/dwight.velasco/dwight.velasco/scratch1/THESIS/RasterToArray/modisgrid/Clean-PHGridmap.shp 2016.tif 2016b.tif && gdalwarp -s_srs EPSG:4326 -srcnodata -2147483647 -dstnodata -2147483647 -t_srs epsg:4326 -te 116.916 4.623 126.636 20.877 -te_srs EPSG:4326 -tr 0.0270 0.0270 -r bilinear -multi -wo NUM_THREADS=ALL_CPUS -overwrite 2016b.tif 2016c.tif
 # gdalwarp -multi -wo NUM_THREADS=ALL_CPUS -wo CUTLINE_ALL_TOUCHED=TRUE -overwrite -srcnodata -2147483647 -dstnodata -2147483647 -crop_to_cutline -cutline  /home/dwight.velasco/dwight.velasco/scratch1/THESIS/RasterToArray/modisgrid/Clean-PHGridmap.shp 2017.tif 2017b.tif && gdalwarp -s_srs EPSG:4326 -srcnodata -2147483647 -dstnodata -2147483647 -t_srs epsg:4326 -te 116.916 4.623 126.636 20.877 -te_srs EPSG:4326 -tr 0.0270 0.0270 -r bilinear -multi -wo NUM_THREADS=ALL_CPUS -overwrite 2017b.tif 2017c.tif
@@ -95,13 +94,19 @@ import glob
 
 
 ############################################################################
-# VIIRS DNB
-# gdalbuildvrt -resolution highest -separate -overwrite VIIRSDNB15.vrt /home/dwight.velasco/dwight.velasco/scratch1/THESIS/VIIRS/DNB/15/*.tif 
-# && gdal_translate --config GDAL_CACHEMAX 1024 -of GTiff -a_srs EPSG:4326 -a_ullr 116.916 4.623 126.636 20.877 -co NUM_THREADS=ALL_CPUS VIIRSDNB15.vrt VIIRSDNB15.tif 
-# && gdal_calc.py -A VIIRSDNB15.tif --overwrite --outfile=VIIRSDNB15.tif --calc="A*(A>0)" --NoDataValue=0 --allBands=A && gdalwarp -s_srs EPSG:4326 -t_srs epsg:4326 -te 116.916 4.623 126.636 20.877 -te_srs EPSG:4326 -tr 0.0270 0.0270 -srcnodata 0 -r bilinear -multi -wo NUM_THREADS=ALL_CPUS -overwrite VIIRSDNB15.tif VIIRSDNB15b.tif && gdalwarp -multi -wo NUM_THREADS=ALL_CPUS -wo CUTLINE_ALL_TOUCHED=TRUE -overwrite -crop_to_cutline -cutline /home/dwight.velasco/dwight.velasco/scratch1/THESIS/RasterToArray/modisgrid/Clean-PHGridmap.shp VIIRSDNB15b.tif VIIRSDNB15c.tif
+# *VIIRS DNB
+# gdalbuildvrt -resolution highest -separate -overwrite VIIRSDNB18.vrt ./SVDNB*.tif 
+# //// gdal_translate --config GDAL_CACHEMAX 1024 -of GTiff -a_srs EPSG:4326 -a_ullr 116.916 4.623 126.636 20.877 -co NUM_THREADS=ALL_CPUS VIIRSDNB15.vrt VIIRSDNB15.tif 
+# gdalwarp -of VRT -dstnodata -9999 -multi -wo NUM_THREADS=ALL_CPUS -wo CUTLINE_ALL_TOUCHED=TRUE -overwrite -crop_to_cutline -cutline /home/dwight.velasco/dwight.velasco/scratch1/THESIS/RasterToArray/modisgrid/Clean-PHGridmap.shp VIIRSDNB18.vrt VIIRSDNB18_cut.vrt
+# /////home/dwight.velasco/dwight.velasco/scratch1/THESIS/Boundaries/phl_admbnda_adm0_psa_namria_itos_20180130.shp
+# gdalwarp -s_srs EPSG:4326 -t_srs epsg:4326 -te 116.916 4.623 126.636 20.877 -te_srs EPSG:4326 -tr 0.0270 0.0270 -srcnodata -9999 -dstnodata -9999 -r med -multi -wo NUM_THREADS=ALL_CPUS -co NUM_THREADS=ALL_CPUS --config GDAL_CACHEMAX 40% -wm 40% -co TILED=YES -overwrite VIIRSDNB18_cut.vrt VIIRSDNB18c.tif
+# gdalwarp -srcnodata -9999 -dstnodata -9999 -multi -wo NUM_THREADS=ALL_CPUS -wo CUTLINE_ALL_TOUCHED=TRUE -overwrite -crop_to_cutline -cutline /home/dwight.velasco/dwight.velasco/scratch1/THESIS/RasterToArray/modisgrid/Clean-PHGridmap.shp VIIRSDNB18c.tif VIIRSDNB18_cut.tif
+# gdal_merge.py -n -9999 -a_nodata -9999 -separate -of GTiff -o 1518.tif ./*cut.tif
 ############################################################################
 
 
 ############################################################################
-# VIIRS AERDB_L2
+# *VIIRS AERDB_L2
+# gdalbuildvrt -a_srs epsg:4326 -srcnodata '-999.0 -9999' -vrtnodata -9999 -resolution highest -overwrite ./MODISVIIRS.vrt /home/dwight.velasco/dwight.velasco/scratch1/THESIS/VIIRS/TIF/1518.tif /home/dwight.velasco/dwight.velasco/scratch1/THESIS/MYD04_3K/MODIS_AOD4326.tif
+# gdal_translate --config GDAL_CACHEMAX 2048 -of GTiff -co "TILED=YES" -co NUM_THREADS=ALL_CPUS ./MODISVIIRS.vrt ./MODISVIIRS.tif
 # ############################################################################
