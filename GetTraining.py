@@ -7,7 +7,7 @@ from pandas.plotting import scatter_matrix
 
 # import GroundPM_allsites
 from RasterToArray import RasterToArray, GetPixelValue, RasterToArrayDate, GetPixelValueDate
-import pointspergrid
+# import pointspergrid
 
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
@@ -16,7 +16,7 @@ pd.set_option('display.max_columns', None)
 filepath = '/home/dwight.velasco/scratch1/THESIS/GroundPM/'
 
 coordinates = [
-    (14.4500650,120.9943758,filepath+'NCR/Las_Pinas.csv'),
+    (14.4500650,120.9943758, filepath+'NCR/Las_Pinas.csv'),
     (14.5645950,121.0559080, filepath+'NCR/Makati_Pasig.csv'),
     (14.5833967,121.0368167, filepath+'NCR/Mandaluyong.csv'),
     (14.6334111,121.0998333, filepath+'NCR/Marikina.csv'),
@@ -30,8 +30,15 @@ coordinates = [
     (14.5104710,121.0359230, filepath+'NCR/Taguig.csv'),
     (14.6581220,120.9756960, filepath+'NCR/UE_Caloocan.csv'),
     (16.4097200,120.5938900, filepath+'CAR/CAR1518.csv'),
+    (15.9983333,120.5708333, filepath+'R1/UrdanetaDaily.csv'),
+    (18.0577778,120.5477778, filepath+'R1/BatacDaily.csv'),
+    (16.5977320,120.3220690, filepath+'R1/SFDaily.csv'),
+    (14.5861111,121.1697222, filepath+'R4A/RizalDaily.csv'),
+    (14.3160000,121.1098056, filepath+'R4A/StaRosaDaily.csv'),
+    (14.3125000,121.0783333, filepath+'R4A/BinanDaily.csv'),
     (09.7775000,118.7341667, filepath+'R4B/MIMAROPA_1518.csv'), 
     (13.1658500,123.7516667, filepath+'R5/R51518.csv'),
+    (10.2927290,123.9015790, filepath+'R7/Cebu.csv'),
     (08.4966667,124.6602778, filepath+'R10/R10_CdeO.csv'),
     (08.5572222,124.5211111, filepath+'R10/R10_ElSalvador.csv'),
     (08.2350556,124.2506111, filepath+'R10/R10_Iligan.csv'),
@@ -39,7 +46,21 @@ coordinates = [
     (07.1180690,125.6340000, filepath+'R11/r11_doas.csv'),
     (08.9549899,125.5267899, filepath+'R13/R13_pms.csv'),  
     (08.9558100,125.5970800, filepath+'R13/R13_doas.csv')
-    ]
+
+    # (14.4500650,120.9943758, filepath+'NCR/1pm/Las_Pinas_1pm.csv'),
+    # (14.5645950,121.0559080, filepath+'NCR/1pm/Makati_Pasig_1pm.csv'),
+    # (14.5833967,121.0368167, filepath+'NCR/1pm/Mandaluyong_1pm.csv'),
+    # (14.6334111,121.0998333, filepath+'NCR/1pm/Marikina_1pm.csv'),
+    # (14.3834944,121.0336750, filepath+'NCR/1pm/Muntinlupa_1pm.csv'),
+    # (14.6577167,120.9477000, filepath+'NCR/1pm/Navotas_1pm.csv'),
+    # (14.7513425,121.0539344, filepath+'NCR/1pm/North_Caloocan_1pm.csv'),
+    # (14.4815269,121.0382578, filepath+'NCR/1pm/Paranaque_1pm.csv'),
+    # (14.5286250,121.0081444, filepath+'NCR/1pm/Pasay_1pm.csv'),
+    # (14.5467972,121.0667583, filepath+'NCR/1pm/Pateros_1pm.csv'),
+    # (14.6055583,121.0322389, filepath+'NCR/1pm/San_Juan_1pm.csv'),
+    # (14.5104710,121.0359230, filepath+'NCR/1pm/Taguig_1pm.csv'),
+    # (14.6581220,120.9756960, filepath+'NCR/1pm/UE_Caloocan_1pm.csv')
+]
 
 
 def setDatetime(df):
@@ -56,6 +77,7 @@ date_df['datetime'] = pd.to_datetime(date_df['Date'])
 dsstore = RasterToArray()
 dsstoreDate = RasterToArrayDate()
 fullData = []
+
 
 def GetTraining(data):
     for cy, cx, csvfile in coordinates:
@@ -78,8 +100,8 @@ def GetTraining(data):
 
         training['modis_aod'] = pd.Series(listedvals[0])
         training['viirs_aod'] = pd.Series(listedvals[21])
-        # training['merra_pm2.5'] = pd.Series(listedvals[1])
-        # training['merra_pm2.5'] *= 1000000000
+        training['merra_pm2.5'] = pd.Series(listedvals[1])
+        training['merra_pm2.5'] *= 1000000000
         training['omi_no2'] = pd.Series(listedvals[19])
         training['modis_lst'] = pd.Series(listedvals[20])
 
@@ -96,7 +118,7 @@ def GetTraining(data):
         training['evaporation'] = pd.Series(listedvals[12])
         training['boundary_layer_height'] = pd.Series(listedvals[13])
         training['r_humidity_875'] = pd.Series(listedvals[14])
-        training['s_humididity_875'] = pd.Series(listedvals[15])
+        training['s_humidity_875'] = pd.Series(listedvals[15])
         training['temp_875'] = pd.Series(listedvals[16])
         training['uwind_875'] = pd.Series(listedvals[17])
         training['vwind_875'] = pd.Series(listedvals[18])
@@ -140,12 +162,15 @@ def GetTraining(data):
         training['AOD'] = training[['modis_aod', 'viirs_aod']].bfill(1).iloc[:,0]
         training.loc[training['AOD'] < 0, 'AOD'] = 0
         training.drop(['Date', 'modis_aod', 'viirs_aod'], axis=1, inplace=True)
-
-        training = training.loc[pd.notnull(training['PM2.5'])]
+        
         if data == 'rf':
+            # training.drop(['omi_no2'], axis=1, inplace=True)
             training = training.loc[pd.notnull(training['AOD'])]
             training = training.loc[pd.notnull(training['modis_lst'])]
-            training = training.loc[pd.notnull(training['omi_no2'])]
+            # training = training.loc[pd.notnull(training['omi_no2'])]
+        
+        training.drop(['omi_no2'], axis=1, inplace=True)
+        training = training.loc[pd.notnull(training['PM2.5'])]
         
         print("Number of valid rows", len(training.index))
         fullData.append(training)

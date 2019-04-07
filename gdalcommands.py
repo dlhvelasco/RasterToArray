@@ -109,4 +109,15 @@ import glob
 # *VIIRS AERDB_L2
 # gdalbuildvrt -a_srs epsg:4326 -srcnodata '-999.0 -9999' -vrtnodata -9999 -resolution highest -overwrite ./MODISVIIRS.vrt /home/dwight.velasco/dwight.velasco/scratch1/THESIS/VIIRS/TIF/1518.tif /home/dwight.velasco/dwight.velasco/scratch1/THESIS/MYD04_3K/MODIS_AOD4326.tif
 # gdal_translate --config GDAL_CACHEMAX 2048 -of GTiff -co "TILED=YES" -co NUM_THREADS=ALL_CPUS ./MODISVIIRS.vrt ./MODISVIIRS.tif
-# ############################################################################
+############################################################################
+
+
+############################################################################
+# *MODIS LAND COVER
+# script.sh + script2b.sh + ArcMap Tabulate Area
+############################################################################
+
+
+############################################################################
+
+############################################################################

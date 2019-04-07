@@ -6,3 +6,8 @@ __pycache__/*
 *.pkl
 *.xml
 *.tif
+plots/*
+old-codes/*
+*.dat
+rf*.txt
+xgb*.txt
