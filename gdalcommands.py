@@ -119,5 +119,5 @@ import glob
 
 
 ############################################################################
-
+# ogr2ogr -sql "SELECT ST_Centroid(geometry), * FROM PHGridmap" -dialect sqlite grid_centroid.csv PHGridmap.shp
 ############################################################################

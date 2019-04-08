@@ -14,6 +14,7 @@ import seaborn as sns; sns.set()
 import time
 import pickle
 import logging
+import copy
 
 
 def smape(actual, forecast):
@@ -95,13 +96,11 @@ print(best_model.get_params)
 
 predictions = best_model.predict(test_featuresA)
 
-smape = smape(test_labelsA, predictions)
-print('sMAPE:', round(np.mean(smape), 2), '%.')
-
+smape_A = smape(test_labelsA, predictions)
+print('sMAPE:', round(np.mean(smape_A), 2), '%.')
 print('Mean Absolute Error:', metrics.mean_absolute_error(test_labelsA, predictions))
 print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(test_labelsA, predictions)))
 print('r2_score:', metrics.r2_score(test_labelsA, predictions))
-# print('R^2 .score:', best_model.score(test_labelsA, predictions))
 
 importances = list(best_model.feature_importances_)
 # List of tuples with variable and importance
@@ -113,61 +112,76 @@ feature_importances = sorted(feature_importances, key = lambda x: x[1], reverse 
 
 mae = np.absolute(predictions - test_labelsA)
 
+test_featuresA2 = copy.deepcopy(test_featuresA)
+test_featuresB2 = copy.deepcopy(test_featuresB)
+
 mice = MICE(n_imputations=75, verbose=False)
-test_featuresA2 = mice.complete(test_featuresA)
-test_featuresB2 = mice.complete(test_featuresB)
+test_featuresA2 = mice.complete(test_featuresA2)
+test_featuresB2 = mice.complete(test_featuresB2)
+
 # pickle.dump(test_featuresA2, open("imp_X_test.pkl.dat", "wb"))
 # test_featuresA2 = pickle.load(open("imp_X_test.pkl.dat", "rb"))
 
 # medians = np.nanmedian(np.array(train_features), axis=0)
 # inds = np.where(np.isnan(test_featuresA))
-# test_featuresA2 = test_featuresA
+# test_featuresA2 = copy.deepcopy(test_featuresA)
 # test_featuresA2[inds] = np.take(medians, inds[1])
 
 non_nans = (~np.isnan(np.array(test_featuresA2))).sum(axis=0) # Indices [1] & [-3] have nans
 print(np.where(non_nans == 0, np.nan, non_nans))
 
+
 gbr_params = {
-    # 'max_depth': [3,6,9,15,None],
-    # 'min_samples_split': [2,3,7,8,9],
+    # 'max_depth': [4,6,9,15,None],
+    # 'min_samples_split': [2,3,5,8,9],
     # 'min_samples_leaf' : [1, 2, 3, 4, 8],
-    # 'max_features' : [4, 5, 8, 9, 10, 11, 12],
+    # 'max_features' : [1, 2, 3, 4, 5, 6, 7],
     # 'subsample': [0.6,0.7,0.75,0.8,0.85,0.9],
     # 'min_impurity_decrease':[0, 0.25, 0.5, 0.75, 1.25],
     # 'learning_rate':[0.6,0.4,0.3,0.2,0.1, 0.05],
 } #
 
-# alpha = 0.975
-# gbr = GradientBoostingRegressor(loss='quantile', criterion='mae', random_state=42, alpha=alpha,learning_rate=0.2, n_estimators=2000, n_iter_no_change=50, max_depth=None,min_samples_split=8,min_samples_leaf=2,max_features=8,subsample=0.8,warm_start=True, tol=0.0001)
-# grid = GridSearchCV(gbr, gbr_params, cv=5, n_jobs=32, scoring='neg_mean_absolute_error')
-# print("Fitting #1")
-# grid.fit(test_featuresA2, mae)
-# print(grid.best_params_, grid.best_score_)
-# best_grid = grid.best_estimator_
-# print(best_grid.n_estimators_)
-# pickle.dump(best_grid, open("y_upper_imp.pkl.dat", "wb"))
+alpha = 0.975
+gbr = GradientBoostingRegressor(loss='quantile', criterion='mae', random_state=42, alpha=alpha,learning_rate=0.2, n_estimators=2000, n_iter_no_change=50, max_depth=None,min_samples_split=2,min_samples_leaf=2,max_features=5,subsample=0.8,warm_start=True, tol=0.0001)
+grid = GridSearchCV(gbr, gbr_params, cv=3, n_jobs=32, scoring='neg_mean_absolute_error')
+print("Fitting #1")
+grid.fit(test_featuresA2, mae)
+print(grid.best_params_, grid.best_score_)
+best_grid = grid.best_estimator_
+print(best_grid.n_estimators_)
+pickle.dump(best_grid, open("y_upper_imp.pkl.dat", "wb"))
 
-best_grid = pickle.load(open("y_upper_imp.pkl.dat", "rb"))
-print(best_grid.get_params)
+# best_grid = pickle.load(open("y_upper_imp.pkl.dat", "rb"))
+# print(best_grid.get_params)
 print("Predicting #1")
 y_upper = best_grid.predict(test_featuresB2)
 
+smape_up = smape(test_labelsB, y_upper)
+print('sMAPE:', round(np.mean(smape_up), 2), '%.')
+print('Mean Absolute Error:', metrics.mean_absolute_error(test_labelsB, y_upper))
+print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(test_labelsB, y_upper)))
+print('r2_score:', metrics.r2_score(test_labelsB, y_upper))
 
-# alpha2 = 0.025
-# gbr2 = GradientBoostingRegressor(loss='quantile', criterion='mae', random_state=42, alpha=alpha2,learning_rate=0.2, n_estimators=2000, n_iter_no_change=50, max_depth=None,min_samples_split=2,min_samples_leaf=3,max_features=4,subsample=0.8,warm_start=True, tol=0.0001)
-# grid2 = GridSearchCV(gbr2, gbr_params, cv=5, n_jobs=32, scoring='neg_mean_absolute_error')
-# print("Fitting #2")
-# grid2.fit(test_featuresA2, mae)
-# print(grid2.best_params_, grid2.best_score_)
-# best_grid2 = grid2.best_estimator_
-# print(best_grid2.n_estimators_)
-# pickle.dump(best_grid2, open("y_lower_imp.pkl.dat", "wb"))
+alpha2 = 0.025
+gbr2 = GradientBoostingRegressor(loss='quantile', criterion='mae', random_state=42, alpha=alpha2,learning_rate=0.2, n_estimators=2000, n_iter_no_change=50, max_depth=None,min_samples_split=2,min_samples_leaf=3,max_features=1,subsample=0.8,warm_start=True, tol=0.0001)
+grid2 = GridSearchCV(gbr2, gbr_params, cv=3, n_jobs=32, scoring='neg_mean_absolute_error')
+print("Fitting #2")
+grid2.fit(test_featuresA2, mae)
+print(grid2.best_params_, grid2.best_score_)
+best_grid2 = grid2.best_estimator_
+print(best_grid2.n_estimators_)
+pickle.dump(best_grid2, open("y_lower_imp.pkl.dat", "wb"))
 
-best_grid2 = pickle.load(open("y_lower_imp.pkl.dat", "rb"))
-print(best_grid2.get_params)
+# best_grid2 = pickle.load(open("y_lower_imp.pkl.dat", "rb"))
+# print(best_grid2.get_params)
 print("Predicting #2")
 y_lower = best_grid2.predict(test_featuresB2)
 
+smape_low = smape(test_labelsB, y_lower)
+print('sMAPE:', round(np.mean(smape_low), 2), '%.')
+print('Mean Absolute Error:', metrics.mean_absolute_error(test_labelsB, y_lower))
+print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(test_labelsB, y_lower)))
+print('r2_score:', metrics.r2_score(test_labelsB, y_lower))
 
 test_labelsA = np.array(test_labelsA)
 predictions = np.array(predictions)
@@ -179,9 +193,6 @@ interval = np.abs(y_upper - y_lower).tolist()
 sorted_labels = np.argsort(test_labelsA)
 test_labelsA = test_labelsA[sorted_labels]
 predictions = predictions[sorted_labels]
-# y_upper = y_upper[sorted_labels]
-# y_lower = y_lower[sorted_labels]
-# mae = mae[sorted_labels]
 
 y_upper_pred = test_labelsA + interval
 y_lower_pred = test_labelsA - interval
@@ -228,7 +239,6 @@ plt.fill_between(
     label="Pred. interval")
 plt.xlabel("Ordered samples")
 plt.ylabel("Values and prediction intervals")
-# plt.xlim(0, 1000)
 plt.ylim(-25, 25)
 plt.savefig("./plots/pred-int-XGB.png")
 

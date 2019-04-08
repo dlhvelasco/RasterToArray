@@ -40,7 +40,7 @@ print(fullData.describe())
 # plt.savefig("./plots/heat.png")
 
 labels = np.array(fullData['PM2.5'])
-fullData = fullData.drop(['PM2.5','vwind','uwind','uwind_875','vwind_875'], axis=1)
+fullData = fullData.drop(['PM2.5'], axis=1)
 
 feature_list = list(fullData.columns)
 features = np.array(fullData)
