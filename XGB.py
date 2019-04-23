@@ -41,6 +41,7 @@ fullDataList = pickle.load(open("fullDataList-xgb.pkl.dat", "rb"))
 
 fullData = pd.concat(fullDataList, ignore_index=True)
 fullData.eval("wind10m = sqrt(uwind**2 + vwind**2)", engine='numexpr', inplace=True)
+fullData.eval("wind875 = sqrt(uwind_875**2 + vwind_875**2)", engine='numexpr', inplace=True)
 # fullData.eval("frac_vegc = fraction_forest + fraction_vegetation", engine='numexpr', inplace=True)
 
 # fullData[['AOD']] = fullData[['AOD']].fillna(value=-1)
@@ -55,8 +56,8 @@ print("\nTotal valid observations: {} \n".format(len(fullData.index)))
 
 labels = np.array(fullData['PM2.5'])
 #! DROP HERE 'frac_vegc',
-fullData = fullData.drop(['uwind_875','vwind_875', 'modis_lst',
-'fraction_water', 'fraction_vegetation', 'fraction_cropland', 'fraction_wetland',
+fullData = fullData.drop([ 'merra_pm2.5', 'omi_no2',
+'fraction_water', 'fraction_vegetation', 'fraction_cropland', 'fraction_wetland', 'fraction_forest', 'fraction_urban',
 ], axis=1) 
 
 """
@@ -74,12 +75,12 @@ fullData = fullData.drop(['PM2.5'], axis=1)
 # feature_names_units = ['AOD', 'MERRA-2 PM2.5 (µg/m^3)', 'OMI NO2 (molecules/cm^2)',  'Population', 'MODIS enhanced vegetation index', 'VIIRS nighttime lights (nW/cm^2/sr)',  'Day of year', 'Eastward wind velocity (m/s)', 'Northward wind velocity (m/s)', '10m wind speed (m/s)', '2m dewpoint temperature (K)', '2m air temperature (K)', 'Surface pressure (Pa)', 'High cloud cover', 'Low cloud cover', 'Total precipitation (m)', 'Evaporation (m)', 'Boundary layer height (m)', 'Relative humidity at 875hPa (%)', 's_humidity_875','temp_875','Surface net solar radiation (J/m^2)', 'Surface net thermal radiation (J/m^2)']
 
 # feature_names = ['AOD', 'MERRA-2 PM2.5', 'OMI NO2', 'Population', 'MODIS enhanced vegetation index', 'VIIRS nighttime lights', 'Day of year', 'Eastward wind velocity', 'Northward wind velocity', '10m wind speed', '2m dewpoint temperature', '2m air temperature', 'Surface pressure', 'High cloud cover', 'Low cloud cover', 'Total precipitation', 'Evaporation', 'Boundary layer height', 'Relative humidity at 875hPa', 's_humidity_875','temp_875', 'Surface net solar radiation', 'Surface net thermal radiation']
-
-feature_abbrv = ['AOD', 'day_of_year', 'merra_pm2.5', 'omi_no2','population',  'viirs_dnb',  'uwind', 'vwind', 'wind10m', 'dewpt_temp', 'air_temp', 'surface_pressure', 'high_cloud_cover', 'low_cloud_cover', 'total_precipitation', 'evaporation', 'boundary_layer_height', 'modis_evi', 'r_humidity_875', 'temp_875', 's_humidity_875',  'fraction_forest', 'fraction_urban',  'surface_net_solar_radiation', 'surface_net_thermal_radiation']
+#! SHOULD ORDER BE PRESERVED IN PREDICTION?
+feature_abbrv = ['AOD', 'day_of_year', 'population', 'modis_lst',  'viirs_dnb',  'uwind', 'vwind', 'wind10m', 'dewpt_temp', 'air_temp', 'surface_pressure', 'high_cloud_cover', 'low_cloud_cover', 'total_precipitation', 'evaporation', 'boundary_layer_height', 'modis_evi', 'r_humidity_875', 'temp_875', 's_humidity_875', 'surface_net_solar_radiation', 'surface_net_thermal_radiation', 'uwind_875','vwind_875','wind875']
 
 print('Number of features:',len(feature_abbrv))
 feature_indices = list(range(0,len(feature_abbrv)+1))
-
+#! SHOULD ORDER BE PRESERVED IN PREDICTION?
 fullData = fullData[feature_abbrv] # Reordering of columns
 
 feature_list = list(fullData.columns)
@@ -116,7 +117,8 @@ feature_monotones = [0]*(len(feature_list))
 # monotone_constraints='(' + ','.join([str(m) for m in feature_monotones]) + ')',
 
 # ! TRY NO COLSAMPLE
-xgb = XGBRegressor(random_state=42, n_jobs=8,max_depth=9, min_child_weight=1, gamma=0.01, subsample=0.8, colsample_bytree=0.9, colsample_bynode=0.7,learning_rate=0.05, reg_alpha=0,reg_lambda=1,n_estimators=2000, importance_type="gain")
+# xgb = XGBRegressor(random_state=42, n_jobs=8,max_depth=9, min_child_weight=1, gamma=0.01, subsample=0.8, colsample_bytree=0.9, colsample_bynode=0.7,learning_rate=0.05, reg_alpha=0,reg_lambda=1,n_estimators=2000, importance_type="gain")
+xgb = XGBRegressor(random_state=42, n_jobs=16,max_depth=10,min_child_weight=2, gamma=1,subsample=0.9, colsample_bytree=0.9,learning_rate=0.01,reg_alpha=0.001,reg_lambda=5,n_estimators=5000)
 
 kf = KFold(n_splits = 3, shuffle = True, random_state = 42)
 # random_search = RandomizedSearchCV(xgb, params, scoring='neg_mean_absolute_error', n_iter=5, random_state=42, cv=kf.split(train_features, train_labels), verbose=10, n_jobs=8, iid=False)
@@ -130,7 +132,7 @@ random_search.fit(train_features, train_labels)
 # best_model = random_search.best_estimator_
 
 best_model = random_search
-# pickle.dump(best_model, open("model-v64-forurb81.dat", "wb"))
+pickle.dump(best_model, open("model-v65.00-prelimvars.dat", "wb"))
 # best_model = pickle.load(open("model-v14-OGvarFdata-gscv.dat", "rb"))
 # print(best_model.get_params)
 
