@@ -107,7 +107,8 @@ import glob
 
 ############################################################################
 # *VIIRS AERDB_L2
-# gdalbuildvrt -a_srs epsg:4326 -srcnodata '-999.0 -9999' -vrtnodata -9999 -resolution highest -overwrite ./MODISVIIRS.vrt /home/dwight.velasco/dwight.velasco/scratch1/THESIS/VIIRS/TIF/1518.tif /home/dwight.velasco/dwight.velasco/scratch1/THESIS/MYD04_3K/MODIS_AOD4326.tif
+# gdalbuildvrt -a_srs epsg:4326 -srcnodata 60 -vrtnodata -9999 -resolution highest -overwrite ./MODISVIIRS.vrt 
+
 # gdal_translate --config GDAL_CACHEMAX 2048 -of GTiff -co "TILED=YES" -co NUM_THREADS=ALL_CPUS ./MODISVIIRS.vrt ./MODISVIIRS.tif
 ############################################################################
 
@@ -119,5 +120,18 @@ import glob
 
 
 ############################################################################
-# ogr2ogr -sql "SELECT ST_Centroid(geometry), * FROM PHGridmap" -dialect sqlite grid_centroid.csv PHGridmap.shp
+# *CENTROIDS FROM VECTOR
+# ogr2ogr -sql "SELECT ST_Centroid(geometry), * FROM Cleaner_PHGridmap" -dialect sqlite gcen_cleaner.csv Cleaner_PHGridmap.shp
+# ogr2ogr -sql "SELECT ST_Centroid(geometry), * FROM NCR_grid" -dialect sqlite NCR_centroid.csv NCR_grid.shp
+
+# Cropping for viz purposes:
+# gdalwarp -srcnodata -9999 -dstnodata -9999 -multi -wo NUM_THREADS=ALL_CPUS -wo CUTLINE_ALL_TOUCHED=TRUE -overwrite -crop_to_cutline -cutline /home/dwight.velasco/dwight.velasco/scratch1/THESIS/Grid/NCR/NCR_dissolved.shp NCR_raster.tif NCR_raster_cut.tif
+############################################################################
+
+
+############################################################################
+# *MYD09CMA AQUA AOT 0.05DEG
+# gdalbuildvrt -srcnodata 60 -vrtnodata -9999 -resolution highest -separate -overwrite ../MYD09CMA.vrt ./*Coarse_Resolution_AOT_at_550_nmcs_000501322083.hdf
+# gdalwarp -s_srs EPSG:4326 -t_srs epsg:4326 -te 116.916 4.623 126.636 20.877 -te_srs EPSG:4326 -tr 0.0270 0.0270 -srcnodata -9999 -dstnodata -9999 -multi -wo NUM_THREADS=ALL_CPUS -co NUM_THREADS=ALL_CPUS --config GDAL_CACHEMAX 40% -wm 40% -co TILED=YES -overwrite ../MYD09CMA.vrt ../MYD09CMAb.tif
+# gdalwarp -srcnodata -9999 -dstnodata -9999 -multi -wo NUM_THREADS=ALL_CPUS -wo CUTLINE_ALL_TOUCHED=TRUE -overwrite -crop_to_cutline -cutline /home/dwight.velasco/dwight.velasco/scratch1/THESIS/RasterToArray/modisgrid/Clean-PHGridmap.shp ../MYD09CMAb.tif ../MYD09CMA_cut.tif
 ############################################################################

@@ -1,9 +1,11 @@
 import pandas as pd
 from datetime import datetime
+from datetime import date as dtdate
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns; sns.set()
 from pandas.plotting import scatter_matrix
+import sys
 
 # import GroundPM_allsites
 from RasterToArray import RasterToArray, GetPixelValue, RasterToArrayDate, GetPixelValueDate
@@ -33,17 +35,27 @@ coordinates = [
     (15.9983333,120.5708333, filepath+'R1/UrdanetaDaily.csv'),
     (18.0577778,120.5477778, filepath+'R1/BatacDaily.csv'),
     (16.5977320,120.3220690, filepath+'R1/SFDaily.csv'),
+    (15.0262667,120.6765667, filepath+'R3/SanFernando.csv'),
+    (14.6818611,120.5383000, filepath+'R3/Balanga.csv'),
+    (14.8220722,120.2836472, filepath+'R3/Subic.csv'),
+    (14.7755000,120.9986667, filepath+'R3/Meycauayan.csv'),
     (14.5861111,121.1697222, filepath+'R4A/RizalDaily.csv'),
     (14.3160000,121.1098056, filepath+'R4A/StaRosaDaily.csv'),
     (14.3125000,121.0783333, filepath+'R4A/BinanDaily.csv'),
     (09.7775000,118.7341667, filepath+'R4B/MIMAROPA_1518.csv'), 
     (13.1658500,123.7516667, filepath+'R5/R51518.csv'),
-    (10.2927290,123.9015790, filepath+'R7/Cebu.csv'),
+    (10.6586667,122.9666389, filepath+'R6/Bacolod.csv'),
+    (10.6989778,122.5639639, filepath+'R6/IloiloDaily.csv'),
+    (10.7854444,122.5904167, filepath+'R6/Leganes.csv'),
+    (10.2538889,123.8291667, filepath+'R7/Cebu.csv'),
+    (06.9445972,122.0839000, filepath+'R9/R9_DOAS.csv'),
+    (07.0077917,121.9285944, filepath+'R9/R9_PMS.csv'),
     (08.4966667,124.6602778, filepath+'R10/R10_CdeO.csv'),
     (08.5572222,124.5211111, filepath+'R10/R10_ElSalvador.csv'),
     (08.2350556,124.2506111, filepath+'R10/R10_Iligan.csv'),
     (08.5684260,124.7760860, filepath+'R10/R10_Villanueva.csv'),
     (07.1180690,125.6340000, filepath+'R11/r11_doas.csv'),
+    (07.1849860,125.4568000, filepath+'R11/r11_pms.csv'),
     (08.9549899,125.5267899, filepath+'R13/R13_pms.csv'),  
     (08.9558100,125.5970800, filepath+'R13/R13_doas.csv')
 
@@ -77,6 +89,15 @@ date_df['datetime'] = pd.to_datetime(date_df['Date'])
 dsstore = RasterToArray()
 dsstoreDate = RasterToArrayDate()
 fullData = []
+
+landcover_csv = [
+"/home/dwight.velasco/scratch1/THESIS/MCD12Q1/115_xy_LC2.csv", 
+"/home/dwight.velasco/scratch1/THESIS/MCD12Q1/116_xy_LC2.csv",
+"/home/dwight.velasco/scratch1/THESIS/MCD12Q1/117_xy_LC2.csv", 
+"/home/dwight.velasco/scratch1/THESIS/MCD12Q1/118_xy_LC2.csv"
+] # LC2: fixed veg, +wetland, +cropland
+
+landcover_types = ['fraction_forest', 'fraction_vegetation', 'fraction_wetland','fraction_cropland','fraction_urban', 'fraction_water']
 
 
 def GetTraining(data):
@@ -126,7 +147,7 @@ def GetTraining(data):
         training['population'] = ""
         training['modis_evi'] = ""
         training['viirs_dnb'] = ""
-        
+
         training['datetime'] = pd.to_datetime(training['Date'])
         training = training.set_index('datetime')
 
@@ -134,13 +155,41 @@ def GetTraining(data):
         for idx, dates in enumerate(storedarrayDate.listlisteddates):
             for date in range(len(dates)):
                 training.loc[training.index == dates[date], training.columns[idx-len(storedarrayDate.listlisteddates)]] = storedarrayDate.listlistedvals[idx][date]
+                
+        training['fraction_forest'] = ""
+        training['fraction_vegetation'] = ""
+        training['fraction_wetland'] = ""
+        training['fraction_cropland'] = ""
+        training['fraction_urban'] = ""
+        training['fraction_water'] = ""
+
+        for landcover_type in landcover_types:
+            for idx, year in enumerate(range(2015,2019)):
+                df = pd.read_csv(landcover_csv[idx], index_col=0)
+                training.loc[training.index == '%d-01-01'%year, landcover_type] = float(df.loc[df['px-py'] == '(%d, %d)' %(px,py), landcover_type])
 
         training['population'].replace("",np.nan, inplace=True)
         training['modis_evi'].replace("",np.nan, inplace=True)
         training['viirs_dnb'].replace("",np.nan, inplace=True)
+
+        training['fraction_forest'].replace("",np.nan, inplace=True)
+        training['fraction_vegetation'].replace("",np.nan, inplace=True)
+        training['fraction_wetland'].replace("",np.nan, inplace=True)
+        training['fraction_cropland'].replace("",np.nan, inplace=True)
+        training['fraction_urban'].replace("",np.nan, inplace=True)
+        training['fraction_water'].replace("",np.nan, inplace=True)
+
         training['population'].fillna(method='ffill', inplace=True)
         training['modis_evi'].fillna(method='ffill', inplace=True)
         training['viirs_dnb'].fillna(method='ffill', inplace=True)
+
+        training['fraction_forest'].fillna(method='ffill', inplace=True)
+        training['fraction_vegetation'].fillna(method='ffill', inplace=True)
+        training['fraction_wetland'].fillna(method='ffill', inplace=True)
+        training['fraction_cropland'].fillna(method='ffill', inplace=True)
+        training['fraction_urban'].fillna(method='ffill', inplace=True)
+        training['fraction_water'].fillna(method='ffill', inplace=True)
+
         training.loc[training['viirs_dnb'] < 0, 'viirs_dnb'] = 0
         training.loc[training['modis_evi'] < 0, 'modis_evi'] = 0
         training.loc[training['omi_no2'] <= 0, 'omi_no2'] = np.nan
@@ -166,21 +215,19 @@ def GetTraining(data):
         if data == 'rf':
             # training.drop(['omi_no2'], axis=1, inplace=True)
             training = training.loc[pd.notnull(training['AOD'])]
-            training = training.loc[pd.notnull(training['modis_lst'])]
+            # training = training.loc[pd.notnull(training['modis_lst'])]
             # training = training.loc[pd.notnull(training['omi_no2'])]
         
-        training.drop(['omi_no2'], axis=1, inplace=True)
+        # training.drop(['omi_no2'], axis=1, inplace=True)
         training = training.loc[pd.notnull(training['PM2.5'])]
         
         print("Number of valid rows", len(training.index))
         fullData.append(training)
+        
+        # print("NTL Missing %",training['viirs_dnb'].isnull().sum()/len(training)*100)  # percent missingness
 
+        # sys.exit("Error message")
         # print(training.describe())
-
-        # plt.figure()
-        # training.plot(subplots=True, figsize=(15, 25))
-        # plt.title('Scatter Matrix for ' + csvfile[61:-4])
-        # plt.savefig("/home/dwight.velasco/dwight.velasco/scratch1/THESIS/RasterToArray/plots/" + csvfile[64:-4] + "scatter.png")
 
         # print(training[aodcols].head(21))
         # print(training.dtypes)  # ?population is object for some reason

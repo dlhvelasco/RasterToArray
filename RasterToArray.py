@@ -85,7 +85,7 @@ def RasterToArray():
 	print("Obtaining array from raster...")
 	listlistedvals = []
 	for index, (predictor, scale_factor, offset) in enumerate(predictors):
-		print("Processing raster: {}/{}".format(index+1, (len(predictors2)+len(predictors))))
+		# print("Processing raster: {}/{}".format(index+1, (len(predictors2)+len(predictors))))
 		ds = rasterio.open(predictor, 'r')  # Saved in RasterToArray folder
 
 		listlistedvals.append(ds)
@@ -94,7 +94,7 @@ def RasterToArray():
 
 
 def GetPixelValue(dsstore, coordinates):
-	print("\nObtaining pixel values for coordinate...")
+	print("Obtaining pixel values for coordinate...")
 	listlistedvals = []
 	for index, (predictor, scale_factor, offset) in enumerate(predictors):
 		# print("Processing predictor: {}/{}".format(index+1, len(predictors)))
@@ -144,7 +144,7 @@ def GetPixelValueDate(dsstoreDate, coordinates):
 	listlistedvals = []
 	listlisteddates = []
 	for index, (predictor, scale_factor, offset, startdate, timestep) in enumerate(predictors2):
-		dateslist = pd.date_range(start='1/1/2015', end='12/31/2018', freq=timestep).strftime('%Y-%m-%d').tolist()
+		dateslist = pd.date_range(start=startdate, end='12/31/2018', freq=timestep).strftime('%Y-%m-%d').tolist()
 
 		ds = dsstoreDate[index]  # read all raster values
 

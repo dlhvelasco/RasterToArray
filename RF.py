@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns; sns.set()
 from subprocess import check_output
 from GetTraining import GetTraining
+import pickle
 
 
 def smape(actual, forecast):
@@ -20,9 +21,12 @@ data = 'rf'
 
 start_time = time.time()
 fullDataList = GetTraining(data)
+# pickle.dump(fullDataList, open("fullDataList-rf.pkl.dat", "wb"))
+# fullDataList = pickle.load(open("fullDataList-rf.pkl.dat", "rb"))
+
 fullData = pd.concat(fullDataList, ignore_index=True)
-fullData["wind10m"] = np.linalg.norm(fullData[["uwind", "vwind"]], axis=1)
-fullData['wind875'] = np.linalg.norm(fullData[["uwind_875", "vwind_875"]], axis=1)
+fullData.eval("wind10m = sqrt(uwind**2 + vwind**2)", engine='numexpr', inplace=True)
+# //fullData['wind875'] = np.linalg.norm(fullData[["uwind_875", "vwind_875"]], axis=1)
 
 print("\nTotal valid observations: {} \n".format(len(fullData.index)))
 print(fullData.describe())
@@ -40,11 +44,11 @@ print(fullData.describe())
 # plt.savefig("./plots/heat.png")
 
 labels = np.array(fullData['PM2.5'])
-fullData = fullData.drop(['PM2.5'], axis=1)
+fullData = fullData.drop(['PM2.5', 'omi_no2', 'modis_lst'], axis=1)
+# 'merra_pm2.5', 'vwind','uwind','uwind_875','vwind_875', 'wind875', 'wind10m', 'omi_no2', 'modis_lst'
 
 feature_list = list(fullData.columns)
 features = np.array(fullData)
-
 
 # Maximum number of levels in tree
 # max_depth = [int(x) for x in np.linspace(10, 110, num = 11)]
@@ -53,8 +57,8 @@ max_depth.append(None)
 
 random_grid = {
     # 'n_estimators': [int(x) for x in np.linspace(start = 200, stop = 2000, num = 10)],
-    'n_estimators': [200, 600, 1000, 1400, 1800],
-    'max_features': [4, 6, 8, 10, int(len(feature_list))],
+    'n_estimators': [600, 1000, 1400, 1800],
+    'max_features': [4, 8, 10, int(len(feature_list))],
     'max_depth': max_depth,
     'min_samples_split': [2, 5, 8, 12],
     'min_samples_leaf': [1, 2, 4, 6],

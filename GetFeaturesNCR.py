@@ -46,18 +46,17 @@ preds = []
 lats = []
 lons = []
 
-gcen = '/home/dwight.velasco/scratch1/THESIS/Grid/gcens_cleaner/%s'%index
 ncr = '/home/dwight.velasco/scratch1/THESIS/Grid/NCR/NCR_centroid.csv'
 
-with open(gcen) as f:
-    # header = next(csv.reader(f))
+with open(ncr) as f:
+    header = next(csv.reader(f))
     coordinates=[(float(row[2]), float(row[1])) for row in csv.reader(f)]
 
 lencoords = len(coordinates)
 # ! CHANGE MODEL AND OUTPUTNAME
 data = 'xgb'
-best_model = pickle.load(open("model-v59-forurb.dat", "rb"))
-outputfilename = '/home/dwight.velasco/scratch1/THESIS/Renders/PH-raster-forurb.tif'
+best_model = pickle.load(open("model-v63-forurb-LST.dat", "rb"))
+outputfilename = '/home/dwight.velasco/scratch1/THESIS/Renders/NCR-v63-forurb-LST.tif'
 
 landcover_csv = [
 "/home/dwight.velasco/scratch1/THESIS/MCD12Q1/115_xy_LC2.csv", 
@@ -94,7 +93,7 @@ for cooordidx, (cy, cx) in enumerate(coordinates):
     features['merra_pm2.5'] = pd.Series(listedvals[1])
     features['merra_pm2.5'] *= 1000000000
     features['omi_no2'] = pd.Series(listedvals[19])
-    # features['modis_lst'] = pd.Series(listedvals[20])
+    features['modis_lst'] = pd.Series(listedvals[20])
 
     features['uwind'] = pd.Series(listedvals[2])
     features['vwind'] = pd.Series(listedvals[3])
@@ -164,12 +163,12 @@ for cooordidx, (cy, cx) in enumerate(coordinates):
 
     modis_aod_mask = np.isclose(features['modis_aod'], -9.999)
     viirs_aod_mask = np.isclose(features['viirs_aod'], -999)
-    # modis_lst_mask = np.isclose(features['modis_lst'], 0.0)
+    modis_lst_mask = np.isclose(features['modis_lst'], 0.0)
     omi_mask = np.isclose(features['omi_no2'], -1.26765e+30)
 
     features.loc[modis_aod_mask, 'modis_aod'] = np.nan
     features.loc[viirs_aod_mask, 'viirs_aod'] = np.nan
-    # features.loc[modis_lst_mask, 'modis_lst'] = np.nan
+    features.loc[modis_lst_mask, 'modis_lst'] = np.nan
     features.loc[omi_mask, 'omi_no2'] = np.nan
 
     features['AOD'] = features[['modis_aod', 'viirs_aod']].bfill(1).iloc[:,0]
@@ -198,28 +197,10 @@ for cooordidx, (cy, cx) in enumerate(coordinates):
 
 
 # *preds, lats, lons are lists
-pickle.dump(preds, open("/home/dwight.velasco/scratch1/THESIS/Grid/gcens_cleaner/preds/preds%s"%index, "wb"))
-pickle.dump(lats, open("/home/dwight.velasco/scratch1/THESIS/Grid/gcens_cleaner/lats/lats%s"%index, "wb"))
-pickle.dump(lons, open("/home/dwight.velasco/scratch1/THESIS/Grid/gcens_cleaner/lons/lons%s"%index, "wb"))
-"""
-############################################################################
-# Merging preds/lats/lons
-letterlist = [letter for letter in ascii_lowercase]
-# letterlist.append('zzz')
 
-for letter2 in letterlist:
-    print("xa%s" % letter2)
-    pred = pickle.load(open("/home/dwight.velasco/scratch1/THESIS/Grid/gcens_cleaner/preds/predsxa%s" % letter2, "rb"))
-    lat = pickle.load(open("/home/dwight.velasco/scratch1/THESIS/Grid/gcens_cleaner/lats/latsxa%s" % letter2, "rb"))
-    lon = pickle.load(open("/home/dwight.velasco/scratch1/THESIS/Grid/gcens_cleaner/lons/lonsxa%s" % letter2, "rb"))
-
-    preds.append(pred)
-    lats.append(lat)
-    lons.append(lon)
-
-preds = list(itertools.chain.from_iterable(preds))
-lats = list(itertools.chain.from_iterable(lats))
-lons = list(itertools.chain.from_iterable(lons))
+# preds = list(itertools.chain.from_iterable(preds))
+# lats = list(itertools.chain.from_iterable(lats))
+# lons = list(itertools.chain.from_iterable(lons))
 
 # pickle.dump(preds, open("/home/dwight.velasco/scratch1/THESIS/Grid/predsFull.pkl", "wb"))
 # preds = pickle.load(open("/home/dwight.velasco/scratch1/THESIS/Grid/predsFull.pkl", "rb"))
@@ -244,8 +225,8 @@ srs = osr.SpatialReference()
 srs.ImportFromEPSG(4326)
 xres = 0.0270
 yres = 0.0270
-nrows = 601 # NCR 17 PH 601
-ncols = 359 # NCR 10 PH 359
+nrows = 17 # NCR 17 PH 601
+ncols = 10 # NCR 10 PH 359
 nbands = 1461
 noData = -9999
 ncells = 94
@@ -276,7 +257,7 @@ for i in range(nbands):
     output_raster.GetRasterBand(i+1).SetNoDataValue(noData)
 
 del output_raster
-"""
+
 print(index)
 end_time = time.time()
 print("\nTime: ", end_time - start_time)
