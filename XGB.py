@@ -17,7 +17,7 @@ import matplotlib.transforms as mtransforms
 from matplotlib.ticker import MaxNLocator
 from matplotlib.ticker import ScalarFormatter
 from matplotlib import ticker
-# from pdpbox import pdp, get_dataset, info_plots
+from pdpbox import pdp, get_dataset, info_plots
 import seaborn as sns; sns.set()
 import random
 import time
@@ -54,11 +54,7 @@ print("NO2 Missing %",fullData['omi_no2'].isnull().sum()/len(fullData)*100)  # p
 # print(fullData.describe())
 print("\nTotal valid observations: {} \n".format(len(fullData.index)))
 
-labels = np.array(fullData['PM2.5'])
-#! DROP HERE 'frac_vegc',
-fullData = fullData.drop([ 'merra_pm2.5', 'omi_no2',
-'fraction_water', 'fraction_vegetation', 'fraction_cropland', 'fraction_wetland', 'fraction_forest', 'fraction_urban',
-], axis=1) 
+fullData = fullData.drop(['r_humidity_875', 's_humidity_875', 'uwind_875','vwind_875','wind875',], axis=1) # Redundancies
 
 """
 plt.figure(figsize=(17,14))
@@ -69,18 +65,30 @@ plt.subplots_adjust(left=0.008, right=0.993, top=0.963, bottom=0.236)
 plt.savefig("/home/dwight.velasco/scratch1/THESIS/Renders/SP-PH/heatXGB.png")
 sys.exit("Error message")
 """
-
+labels = np.array(fullData['PM2.5'])
 fullData = fullData.drop(['PM2.5'], axis=1) 
 
-# feature_names_units = ['AOD', 'MERRA-2 PM2.5 (µg/m^3)', 'OMI NO2 (molecules/cm^2)',  'Population', 'MODIS enhanced vegetation index', 'VIIRS nighttime lights (nW/cm^2/sr)',  'Day of year', 'Eastward wind velocity (m/s)', 'Northward wind velocity (m/s)', '10m wind speed (m/s)', '2m dewpoint temperature (K)', '2m air temperature (K)', 'Surface pressure (Pa)', 'High cloud cover', 'Low cloud cover', 'Total precipitation (m)', 'Evaporation (m)', 'Boundary layer height (m)', 'Relative humidity at 875hPa (%)', 's_humidity_875','temp_875','Surface net solar radiation (J/m^2)', 'Surface net thermal radiation (J/m^2)']
+feature_names_units = ['AOD', 'Day of year', 'Population', 'VIIRS nighttime lights (nW/cm^2/sr)', 'Eastward wind velocity (m/s)', 'Northward wind velocity (m/s)', '10m wind speed (m/s)', 
+'2m dewpoint temperature (K)', '2m air temperature (K)', 'Surface pressure (Pa)', 
+'High cloud cover', 'Low cloud cover', 'Total precipitation (m)', 'Evaporation (m)', 'Boundary layer height (m)', 'MODIS enhanced vegetation index', 'Air temperature at 875hPa (K)',
+'Surface net solar radiation (J/m^2)', 'Surface net thermal radiation (J/m^2)',
+'MERRA-2 PM2.5 concentration (µg/m^3)', 'OMI NO2 concentration (molecules/cm^2)', 'MODIS land surface temperature',
+'Fraction of water area', 'Fraction of vegetated area', 'Fraction of cropland area', 'Fraction of wetland area', 'Fraction of forest cover', 'Fraction of urban area']
+feature_names = ['AOD', 'Day of year', 'Population', 'VIIRS nighttime lights', 'Eastward wind velocity', 'Northward wind velocity', '10m wind speed', 
+'2m dewpoint temperature', '2m air temperature', 'Surface pressure', 
+'High cloud cover', 'Low cloud cover', 'Total precipitation', 'Evaporation', 'Boundary layer height', 'MODIS enhanced vegetation index', 'Air temperature at 875hPa',
+'Surface net solar radiation', 'Surface net thermal radiation',
+'MERRA-2 PM2.5 concentration', 'OMI NO2 concentration', 'MODIS land surface temperature',
+'Fraction of water area', 'Fraction of vegetated area', 'Fraction of cropland area', 'Fraction of wetland area', 'Fraction of forest cover', 'Fraction of urban area']
 
-# feature_names = ['AOD', 'MERRA-2 PM2.5', 'OMI NO2', 'Population', 'MODIS enhanced vegetation index', 'VIIRS nighttime lights', 'Day of year', 'Eastward wind velocity', 'Northward wind velocity', '10m wind speed', '2m dewpoint temperature', '2m air temperature', 'Surface pressure', 'High cloud cover', 'Low cloud cover', 'Total precipitation', 'Evaporation', 'Boundary layer height', 'Relative humidity at 875hPa', 's_humidity_875','temp_875', 'Surface net solar radiation', 'Surface net thermal radiation']
-#! SHOULD ORDER BE PRESERVED IN PREDICTION?
-feature_abbrv = ['AOD', 'day_of_year', 'population', 'modis_lst',  'viirs_dnb',  'uwind', 'vwind', 'wind10m', 'dewpt_temp', 'air_temp', 'surface_pressure', 'high_cloud_cover', 'low_cloud_cover', 'total_precipitation', 'evaporation', 'boundary_layer_height', 'modis_evi', 'r_humidity_875', 'temp_875', 's_humidity_875', 'surface_net_solar_radiation', 'surface_net_thermal_radiation', 'uwind_875','vwind_875','wind875']
+#! Preserve column orders
+feature_abbrv = ['AOD', 'day_of_year', 'population', 'viirs_dnb',  'uwind', 'vwind', 'wind10m', 'dewpt_temp', 'air_temp', 'surface_pressure', 'high_cloud_cover', 'low_cloud_cover', 'total_precipitation', 'evaporation', 'boundary_layer_height', 'modis_evi',  'temp_875',  'surface_net_solar_radiation', 'surface_net_thermal_radiation', 
+'merra_pm2.5', 'omi_no2', 'modis_lst',
+'fraction_water', 'fraction_vegetation', 'fraction_cropland', 'fraction_wetland', 'fraction_forest', 'fraction_urban']
 
 print('Number of features:',len(feature_abbrv))
 feature_indices = list(range(0,len(feature_abbrv)+1))
-#! SHOULD ORDER BE PRESERVED IN PREDICTION?
+
 fullData = fullData[feature_abbrv] # Reordering of columns
 
 feature_list = list(fullData.columns)
@@ -103,37 +111,35 @@ mae_baseline = metrics.mean_absolute_error(train_labels, baseline_predictions)
 print("Baseline MAE is {:.2f}".format(mae_baseline))
 
 params = {  
-    # 'max_depth': [7, 9, 11],
-    # 'min_child_weight': [1, 2, 3],
+    # 'max_depth': [10, 11, 12 ,13],
+    # 'min_child_weight': [1, 2, 3, 5],
     # 'gamma':[0, 0.01, 0.1, 0.5],
-    'subsample': [0.7, 0.8, 0.9],
-    'colsample_bytree': [0.7, 0.8, 0.9],
+    # 'subsample': [0.7, 0.8, 0.9],
+    # 'colsample_bytree': [0.7, 0.8, 0.9],
     # 'colsample_bynode': [0.6, 0.7, 0.8, 0.9],
     # 'reg_alpha':[0, 0.0005, 0.001, 0.01, 0.1],
     # 'reg_lambda':[0.5, 1, 3, 5, 10],
 } 
 
-feature_monotones = [0]*(len(feature_list))
+# feature_monotones = [0]*(len(feature_list))
 # monotone_constraints='(' + ','.join([str(m) for m in feature_monotones]) + ')',
 
-# ! TRY NO COLSAMPLE
-# xgb = XGBRegressor(random_state=42, n_jobs=8,max_depth=9, min_child_weight=1, gamma=0.01, subsample=0.8, colsample_bytree=0.9, colsample_bynode=0.7,learning_rate=0.05, reg_alpha=0,reg_lambda=1,n_estimators=2000, importance_type="gain")
-xgb = XGBRegressor(random_state=42, n_jobs=16,max_depth=10,min_child_weight=2, gamma=1,subsample=0.9, colsample_bytree=0.9,learning_rate=0.01,reg_alpha=0.001,reg_lambda=5,n_estimators=5000)
+xgb = XGBRegressor(random_state=42, n_jobs=8,max_depth=11, min_child_weight=2, gamma=0, subsample=0.9, colsample_bytree=0.9, colsample_bynode=0.9,reg_alpha=0.001, reg_lambda=1, learning_rate=0.05, n_estimators=2000, importance_type="gain")
 
-kf = KFold(n_splits = 3, shuffle = True, random_state = 42)
-# random_search = RandomizedSearchCV(xgb, params, scoring='neg_mean_absolute_error', n_iter=5, random_state=42, cv=kf.split(train_features, train_labels), verbose=10, n_jobs=8, iid=False)
+kf = KFold(n_splits = 5, shuffle = True, random_state = 42)
+# random_search = RandomizedSearchCV(xgb, params, scoring='neg_mean_absolute_error', n_iter=1, random_state=42, cv=kf.split(train_features, train_labels), verbose=10, n_jobs=8, iid=False)
 # random_search = GridSearchCV(xgb, params, scoring='neg_mean_absolute_error', cv=kf.split(train_features, train_labels), verbose=10, n_jobs=8, iid=False)
 
 random_search = xgb
-random_search.fit(train_features, train_labels)
+# random_search.fit(train_features, train_labels)
 
 # print(random_search.best_params_)
 # print(random_search.best_estimator_)
 # best_model = random_search.best_estimator_
 
 best_model = random_search
-pickle.dump(best_model, open("model-v65.00-prelimvars.dat", "wb"))
-# best_model = pickle.load(open("model-v14-OGvarFdata-gscv.dat", "rb"))
+# pickle.dump(best_model, open("model-v68-all-gscv.dat", "wb"))
+best_model = pickle.load(open("model-v68-all-gscv.dat", "rb"))
 # print(best_model.get_params)
 
 predictions = best_model.predict(test_features) # predictions size determined by test_feature size
@@ -195,7 +201,7 @@ ax.set_xlabel('Observed PM2.5 values (µg/$\mathregular{m^3}$)', fontsize=18)
 ax.set_ylabel('Predicted PM2.5 values (µg/$\mathregular{m^3}$)', fontsize=18) 
 ax.tick_params(axis='both', which='major', labelsize=14)
 ax.plot(np.unique(test_labels), np.poly1d(np.polyfit(test_labels, predictions, 1))(np.unique(test_labels)), 'k-')
-ax.text(233, 1, 'N = 2922    \n$\mathregular{R^2}$ = 0.87$\,\,\,\,\,\,\,\,\,$ \nMAE = 7.56     \nRMSE = 12.20   \nsMAPE = 30.68%', horizontalalignment='right', fontsize=16)
+ax.text(233, 1, 'N = 2922    \n$\mathregular{R^2}$ = 0.87$\,\,\,\,\,\,\,\,\,$ \nMAE = 7.55     \nRMSE = 12.12   \nsMAPE = 29.34%', horizontalalignment='right', fontsize=16)
 plt.tight_layout()
 plt.savefig("/home/dwight.velasco/scratch1/THESIS/Renders/SP-PH/predictionsXGB.png")
 
@@ -226,8 +232,8 @@ def partial_dependency(bst, X, y, feature_ids = [], f_id = -1):
 
     return grid, y_pred
 
-pdp_names = ['Population', 'Fraction of cropland area', 'Surface pressure', 'VIIRS nighttime lights', 'Day of year'] # name of features, not necessary col names
-pdp_indices = [4,8,15,6,9] # index of features w.r.t. original df
+pdp_names = ['Fraction of forest cover','Population', 'Fraction of vegetated area','Fraction of cropland area', 'Fraction of urban area'] # name of features, not necessary col names
+pdp_indices = [26,2,23,24,27] # index of features w.r.t. original df
 for idx, f in enumerate(pdp_names):
     print('Printing feature #%d...'%idx)
     plt.close()
@@ -259,36 +265,34 @@ for idx, f in enumerate(pdp_names):
     plt.tight_layout()
     fig.set_size_inches(7, 6)
     plt.savefig("/home/dwight.velasco/scratch1/THESIS/Renders/SP-PH/100-xgb-%d.png"%idx)
-
-
-print("Printing contour plots...")
-
-pdp_pop = pdp.pdp_isolate(model=best_model, dataset=df_train_features, model_features=feature_flist, feature='f4', num_grid_points=11, n_jobs=32)
-fig, axes = pdp.pdp_plot(pdp_pop, 'Population', plot_lines=True, frac_to_plot=100, x_quantile=True, plot_pts_dist=True, show_percentile=True)
-plt.savefig("/home/dwight.velasco/scratch1/THESIS/Renders/SP-PH/pdp-population.png")
-plt.close()
-
-pdp_frac_crop = pdp.pdp_isolate(model=best_model, dataset=df_train_features, model_features=feature_flist, feature='f8', num_grid_points=11, n_jobs=32)
-fig, axes = pdp.pdp_plot(pdp_frac_crop, 'Fraction of cropland area', plot_lines=True, frac_to_plot=100, x_quantile=True, plot_pts_dist=True, show_percentile=True)
-plt.savefig("/home/dwight.velasco/scratch1/THESIS/Renders/SP-PH/pdp-frac_crop.png")
-plt.close()
-
-pdp_pressure = pdp.pdp_isolate(model=best_model, dataset=df_train_features, model_features=feature_flist, feature='f15', num_grid_points=11, n_jobs=32)
-fig, axes = pdp.pdp_plot(pdp_pressure, 'Surface pressure (Pa)', plot_lines=True, frac_to_plot=100, x_quantile=True, plot_pts_dist=True, show_percentile=True)
-plt.savefig("/home/dwight.velasco/scratch1/THESIS/Renders/SP-PH/pdp-pressure.png")
-plt.close()
-
-pdp_viirsdnb = pdp.pdp_isolate(model=best_model, dataset=df_train_features, model_features=feature_flist, feature='f6', num_grid_points=11, n_jobs=32)
-fig, axes = pdp.pdp_plot(pdp_viirsdnb, 'VIIRS nighttime lights (nW/cm^2/sr)', plot_lines=True, frac_to_plot=100, x_quantile=True, plot_pts_dist=True, show_percentile=True)
-plt.savefig("/home/dwight.velasco/scratch1/THESIS/Renders/SP-PH/pdp-viirsdnb.png")
-plt.close()
-
-pdp_dayofyear = pdp.pdp_isolate(model=best_model, dataset=df_train_features, model_features=feature_flist, feature='f9', num_grid_points=11, n_jobs=32)
-fig, axes = pdp.pdp_plot(pdp_dayofyear, 'Day of year', plot_lines=True, frac_to_plot=100, x_quantile=True, plot_pts_dist=True, show_percentile=True)
-plt.savefig("/home/dwight.velasco/scratch1/THESIS/Renders/SP-PH/pdp-dayofyear.png")
-plt.close()
 """
+print("Printing contour plots...")
+# * grid_type: 'equal', 'percentile'
 
+pdp_forest = pdp.pdp_isolate(model=best_model, dataset=df_train_features, model_features=feature_flist, feature='f26', num_grid_points=10, grid_type='equal', n_jobs=32)
+fig, axes = pdp.pdp_plot(pdp_forest, 'Fraction of forest area', plot_lines=True, frac_to_plot=100, x_quantile=True, plot_pts_dist=True, show_percentile=True)
+plt.savefig("/home/dwight.velasco/scratch1/THESIS/Renders/SP-PH/pdp-forest-equal.png")
+plt.close()
+
+pdp_pop = pdp.pdp_isolate(model=best_model, dataset=df_train_features, model_features=feature_flist, feature='f2', num_grid_points=10, grid_type='equal', n_jobs=32)
+fig, axes = pdp.pdp_plot(pdp_pop, 'Population', plot_lines=True, frac_to_plot=100, x_quantile=True, plot_pts_dist=True, show_percentile=True)
+plt.savefig("/home/dwight.velasco/scratch1/THESIS/Renders/SP-PH/pdp-population-equal.png")
+plt.close()
+
+pdp_vegetation = pdp.pdp_isolate(model=best_model, dataset=df_train_features, model_features=feature_flist, feature='f23', num_grid_points=10, grid_type='equal', n_jobs=32)
+fig, axes = pdp.pdp_plot(pdp_vegetation, 'Fraction of vegetated area', plot_lines=True, frac_to_plot=100, x_quantile=True, plot_pts_dist=True, show_percentile=True)
+plt.savefig("/home/dwight.velasco/scratch1/THESIS/Renders/SP-PH/pdp-vegetation-equal.png")
+plt.close()
+
+pdp_cropland = pdp.pdp_isolate(model=best_model, dataset=df_train_features, model_features=feature_flist, feature='f24', num_grid_points=10, grid_type='equal', n_jobs=32)
+fig, axes = pdp.pdp_plot(pdp_cropland, 'Fraction of cropland area', plot_lines=True, frac_to_plot=100, x_quantile=True, plot_pts_dist=True, show_percentile=True)
+plt.savefig("/home/dwight.velasco/scratch1/THESIS/Renders/SP-PH/pdp-cropland-equal.png")
+plt.close()
+
+pdp_urban = pdp.pdp_isolate(model=best_model, dataset=df_train_features, model_features=feature_flist, feature='f27', num_grid_points=10, grid_type='equal', n_jobs=32)
+fig, axes = pdp.pdp_plot(pdp_urban, 'Fraction of urban area', plot_lines=True, frac_to_plot=100, x_quantile=True, plot_pts_dist=True, show_percentile=True)
+plt.savefig("/home/dwight.velasco/scratch1/THESIS/Renders/SP-PH/pdp-urban-equal.png")
+plt.close()
 
 end_time = time.time()
 print("\nTime: ", end_time - start_time)

@@ -132,7 +132,7 @@ def RasterToArrayDate():
 	# print("Obtaining array from raster...")
 	listlistedvals = []
 	for index, (predictor, scale_factor, offset, startdate, timestep) in enumerate(predictors2):
-		print("Processing raster: {}/{}".format((index+1+len(predictors)), (len(predictors2)+len(predictors))))
+		# print("Processing raster: {}/{}".format((index+1+len(predictors)), (len(predictors2)+len(predictors))))
 		ds = rasterio.open(predictor, 'r')  # Saved in RasterToArray folder
 
 		listlistedvals.append(ds)

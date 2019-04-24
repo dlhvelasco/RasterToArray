@@ -56,8 +56,8 @@ with open(gcen) as f:
 lencoords = len(coordinates)
 # ! CHANGE MODEL AND OUTPUTNAME
 data = 'xgb'
-best_model = pickle.load(open("model-v59-forurb.dat", "rb"))
-outputfilename = '/home/dwight.velasco/scratch1/THESIS/Renders/PH-raster-forurb.tif'
+best_model = pickle.load(open("model-v68-all-gscv.dat", "rb"))
+outputfilename = '/home/dwight.velasco/scratch1/THESIS/Renders/PH-raster-v3.tif'
 
 landcover_csv = [
 "/home/dwight.velasco/scratch1/THESIS/MCD12Q1/115_xy_LC2.csv", 
@@ -65,16 +65,16 @@ landcover_csv = [
 "/home/dwight.velasco/scratch1/THESIS/MCD12Q1/117_xy_LC2.csv", 
 "/home/dwight.velasco/scratch1/THESIS/MCD12Q1/118_xy_LC2.csv"
 ] # LC2: fixed veg, +wetland, +cropland
-# ! CHANGE LC
+
 landcover_types = [
-# 'fraction_cropland', 
+'fraction_cropland', 
 'fraction_forest', 
-# 'fraction_vegetation',
-# 'fraction_wetland',
+'fraction_vegetation',
+'fraction_wetland',
 'fraction_urban',
-# 'fraction_water',
+'fraction_water',
 ]
-# ! CHANGE 875 and/OR LST
+
 
 for cooordidx, (cy, cx) in enumerate(coordinates):
     print("\nProcessing: %d/%d ..." %(cooordidx+1, lencoords))
@@ -94,7 +94,7 @@ for cooordidx, (cy, cx) in enumerate(coordinates):
     features['merra_pm2.5'] = pd.Series(listedvals[1])
     features['merra_pm2.5'] *= 1000000000
     features['omi_no2'] = pd.Series(listedvals[19])
-    # features['modis_lst'] = pd.Series(listedvals[20])
+    features['modis_lst'] = pd.Series(listedvals[20])
 
     features['uwind'] = pd.Series(listedvals[2])
     features['vwind'] = pd.Series(listedvals[3])
@@ -108,8 +108,8 @@ for cooordidx, (cy, cx) in enumerate(coordinates):
     features['total_precipitation'] = pd.Series(listedvals[11])
     features['evaporation'] = pd.Series(listedvals[12])
     features['boundary_layer_height'] = pd.Series(listedvals[13])
-    features['r_humidity_875'] = pd.Series(listedvals[14])
-    features['s_humidity_875'] = pd.Series(listedvals[15])
+    # //features['r_humidity_875'] = pd.Series(listedvals[14])
+    # //features['s_humidity_875'] = pd.Series(listedvals[15])
     features['temp_875'] = pd.Series(listedvals[16])
     # //features['uwind_875'] = pd.Series(listedvals[17])
     # //features['vwind_875'] = pd.Series(listedvals[18])
@@ -127,11 +127,11 @@ for cooordidx, (cy, cx) in enumerate(coordinates):
             features.loc[features.index == dates[date], features.columns[idx-len(storedarrayDate.listlisteddates)]] = storedarrayDate.listlistedvals[idx][date]
 
     features['fraction_forest'] = ""
-    # features['fraction_vegetation'] = ""
-    # features['fraction_wetland'] = ""
-    # features['fraction_cropland'] = ""
+    features['fraction_vegetation'] = ""
+    features['fraction_wetland'] = ""
+    features['fraction_cropland'] = ""
     features['fraction_urban'] = ""
-    # features['fraction_water'] = ""
+    features['fraction_water'] = ""
     # ! SET PROPERLY
     for landcover_type in landcover_types:
         for idx, year in enumerate(range(2015,2019)):
@@ -139,18 +139,18 @@ for cooordidx, (cy, cx) in enumerate(coordinates):
             features.loc[features.index == '%d-01-01'%year, landcover_type] = float(df.loc[df['px-py'] == '(%d, %d)' %(px,py), landcover_type])
 
     features['fraction_forest'].replace("",np.nan, inplace=True)
-    # features['fraction_vegetation'].replace("",np.nan, inplace=True)
-    # features['fraction_wetland'].replace("",np.nan, inplace=True)
-    # features['fraction_cropland'].replace("",np.nan, inplace=True)
+    features['fraction_vegetation'].replace("",np.nan, inplace=True)
+    features['fraction_wetland'].replace("",np.nan, inplace=True)
+    features['fraction_cropland'].replace("",np.nan, inplace=True)
     features['fraction_urban'].replace("",np.nan, inplace=True)
-    # features['fraction_water'].replace("",np.nan, inplace=True)
+    features['fraction_water'].replace("",np.nan, inplace=True)
 
     features['fraction_forest'].fillna(method='ffill', inplace=True)
-    # features['fraction_vegetation'].fillna(method='ffill', inplace=True)
-    # features['fraction_wetland'].fillna(method='ffill', inplace=True)
-    # features['fraction_cropland'].fillna(method='ffill', inplace=True)
+    features['fraction_vegetation'].fillna(method='ffill', inplace=True)
+    features['fraction_wetland'].fillna(method='ffill', inplace=True)
+    features['fraction_cropland'].fillna(method='ffill', inplace=True)
     features['fraction_urban'].fillna(method='ffill', inplace=True)
-    # features['fraction_water'].fillna(method='ffill', inplace=True)
+    features['fraction_water'].fillna(method='ffill', inplace=True)
 
     features['population'].replace("",np.nan, inplace=True)
     features['modis_evi'].replace("",np.nan, inplace=True)
@@ -164,12 +164,12 @@ for cooordidx, (cy, cx) in enumerate(coordinates):
 
     modis_aod_mask = np.isclose(features['modis_aod'], -9.999)
     viirs_aod_mask = np.isclose(features['viirs_aod'], -999)
-    # modis_lst_mask = np.isclose(features['modis_lst'], 0.0)
+    modis_lst_mask = np.isclose(features['modis_lst'], 0.0)
     omi_mask = np.isclose(features['omi_no2'], -1.26765e+30)
 
     features.loc[modis_aod_mask, 'modis_aod'] = np.nan
     features.loc[viirs_aod_mask, 'viirs_aod'] = np.nan
-    # features.loc[modis_lst_mask, 'modis_lst'] = np.nan
+    features.loc[modis_lst_mask, 'modis_lst'] = np.nan
     features.loc[omi_mask, 'omi_no2'] = np.nan
 
     features['AOD'] = features[['modis_aod', 'viirs_aod']].bfill(1).iloc[:,0]
@@ -180,12 +180,19 @@ for cooordidx, (cy, cx) in enumerate(coordinates):
         features = features.loc[pd.notnull(features['AOD'])]
     
     features.eval("wind10m = sqrt(uwind**2 + vwind**2)", engine='numexpr', inplace=True)
+    # //features.eval("wind875 = sqrt(uwind_875**2 + vwind_875**2)", engine='numexpr', inplace=True)
     
-    # features.eval("frac_veg_combined = fraction_forest + fraction_vegetation", engine='numexpr', inplace=True)
-    # features = features.drop(['fraction_forest','fraction_vegetation'], axis=1) 
+    # //features.eval("frac_veg_combined = fraction_forest + fraction_vegetation", engine='numexpr', inplace=True)
+    # //features = features.drop(['fraction_forest','fraction_vegetation'], axis=1) 
     
     # print("Number of valid rows", len(features.index))
     # print("Number of columns", len(features.columns))
+    #! Preserve column orders
+    feature_abbrv = ['AOD', 'day_of_year', 'population', 'viirs_dnb',  'uwind', 'vwind', 'wind10m', 'dewpt_temp', 'air_temp', 'surface_pressure', 'high_cloud_cover', 'low_cloud_cover', 'total_precipitation', 'evaporation', 'boundary_layer_height', 'modis_evi',  'temp_875',  'surface_net_solar_radiation', 'surface_net_thermal_radiation', 
+    'merra_pm2.5', 'omi_no2', 'modis_lst',
+    'fraction_water', 'fraction_vegetation', 'fraction_cropland', 'fraction_wetland', 'fraction_forest', 'fraction_urban',]
+    
+    features = features[feature_abbrv]
 
     features_array = np.array(features)
     lats.append(cy)
