@@ -135,3 +135,8 @@ import glob
 # gdalwarp -s_srs EPSG:4326 -t_srs epsg:4326 -te 116.916 4.623 126.636 20.877 -te_srs EPSG:4326 -tr 0.0270 0.0270 -srcnodata -9999 -dstnodata -9999 -multi -wo NUM_THREADS=ALL_CPUS -co NUM_THREADS=ALL_CPUS --config GDAL_CACHEMAX 40% -wm 40% -co TILED=YES -overwrite ../MYD09CMA.vrt ../MYD09CMAb.tif
 # gdalwarp -srcnodata -9999 -dstnodata -9999 -multi -wo NUM_THREADS=ALL_CPUS -wo CUTLINE_ALL_TOUCHED=TRUE -overwrite -crop_to_cutline -cutline /home/dwight.velasco/dwight.velasco/scratch1/THESIS/RasterToArray/modisgrid/Clean-PHGridmap.shp ../MYD09CMAb.tif ../MYD09CMA_cut.tif
 ############################################################################
+
+
+############################################################################
+# gdal_calc.py --calc="mean(A,dtype=float32)" --type="Float32" --overwrite --NoDataValue=-9999 --allBands=A --outfile '/home/dwight.velasco/scratch1/THESIS/Renders/PH-raster-v5-mean.tif'  -A  '/home/dwight.velasco/scratch1/THESIS/Renders/PH-raster-v5.tif' 
+############################################################################

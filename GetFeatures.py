@@ -56,8 +56,8 @@ with open(gcen) as f:
 lencoords = len(coordinates)
 # ! CHANGE MODEL AND OUTPUTNAME
 data = 'xgb'
-best_model = pickle.load(open("model-v68-all-gscv.dat", "rb"))
-outputfilename = '/home/dwight.velasco/scratch1/THESIS/Renders/PH-raster-v3.tif'
+best_model = pickle.load(open("model-v73-norh-vegc-nocrop.dat", "rb"))
+outputfilename = '/home/dwight.velasco/scratch1/THESIS/Renders/PH-raster-v5.tif'
 
 landcover_csv = [
 "/home/dwight.velasco/scratch1/THESIS/MCD12Q1/115_xy_LC2.csv", 
@@ -67,7 +67,7 @@ landcover_csv = [
 ] # LC2: fixed veg, +wetland, +cropland
 
 landcover_types = [
-'fraction_cropland', 
+# 'fraction_cropland', 
 'fraction_forest', 
 'fraction_vegetation',
 'fraction_wetland',
@@ -75,7 +75,7 @@ landcover_types = [
 'fraction_water',
 ]
 
-
+"""
 for cooordidx, (cy, cx) in enumerate(coordinates):
     print("\nProcessing: %d/%d ..." %(cooordidx+1, lencoords))
 
@@ -109,7 +109,7 @@ for cooordidx, (cy, cx) in enumerate(coordinates):
     features['evaporation'] = pd.Series(listedvals[12])
     features['boundary_layer_height'] = pd.Series(listedvals[13])
     # //features['r_humidity_875'] = pd.Series(listedvals[14])
-    # //features['s_humidity_875'] = pd.Series(listedvals[15])
+    features['s_humidity_875'] = pd.Series(listedvals[15])
     features['temp_875'] = pd.Series(listedvals[16])
     # //features['uwind_875'] = pd.Series(listedvals[17])
     # //features['vwind_875'] = pd.Series(listedvals[18])
@@ -129,7 +129,7 @@ for cooordidx, (cy, cx) in enumerate(coordinates):
     features['fraction_forest'] = ""
     features['fraction_vegetation'] = ""
     features['fraction_wetland'] = ""
-    features['fraction_cropland'] = ""
+    # features['fraction_cropland'] = ""
     features['fraction_urban'] = ""
     features['fraction_water'] = ""
     # ! SET PROPERLY
@@ -141,14 +141,14 @@ for cooordidx, (cy, cx) in enumerate(coordinates):
     features['fraction_forest'].replace("",np.nan, inplace=True)
     features['fraction_vegetation'].replace("",np.nan, inplace=True)
     features['fraction_wetland'].replace("",np.nan, inplace=True)
-    features['fraction_cropland'].replace("",np.nan, inplace=True)
+    # features['fraction_cropland'].replace("",np.nan, inplace=True)
     features['fraction_urban'].replace("",np.nan, inplace=True)
     features['fraction_water'].replace("",np.nan, inplace=True)
 
     features['fraction_forest'].fillna(method='ffill', inplace=True)
     features['fraction_vegetation'].fillna(method='ffill', inplace=True)
     features['fraction_wetland'].fillna(method='ffill', inplace=True)
-    features['fraction_cropland'].fillna(method='ffill', inplace=True)
+    # features['fraction_cropland'].fillna(method='ffill', inplace=True)
     features['fraction_urban'].fillna(method='ffill', inplace=True)
     features['fraction_water'].fillna(method='ffill', inplace=True)
 
@@ -182,15 +182,15 @@ for cooordidx, (cy, cx) in enumerate(coordinates):
     features.eval("wind10m = sqrt(uwind**2 + vwind**2)", engine='numexpr', inplace=True)
     # //features.eval("wind875 = sqrt(uwind_875**2 + vwind_875**2)", engine='numexpr', inplace=True)
     
-    # //features.eval("frac_veg_combined = fraction_forest + fraction_vegetation", engine='numexpr', inplace=True)
-    # //features = features.drop(['fraction_forest','fraction_vegetation'], axis=1) 
+    features.eval("frac_vegc = fraction_forest + fraction_vegetation", engine='numexpr', inplace=True)
+    features = features.drop(['fraction_forest','fraction_vegetation'], axis=1) 
     
     # print("Number of valid rows", len(features.index))
     # print("Number of columns", len(features.columns))
     #! Preserve column orders
-    feature_abbrv = ['AOD', 'day_of_year', 'population', 'viirs_dnb',  'uwind', 'vwind', 'wind10m', 'dewpt_temp', 'air_temp', 'surface_pressure', 'high_cloud_cover', 'low_cloud_cover', 'total_precipitation', 'evaporation', 'boundary_layer_height', 'modis_evi',  'temp_875',  'surface_net_solar_radiation', 'surface_net_thermal_radiation', 
+    feature_abbrv = ['AOD', 'day_of_year', 'population', 'viirs_dnb',  'uwind', 'vwind', 'wind10m', 'dewpt_temp', 'air_temp', 'surface_pressure', 'high_cloud_cover', 'low_cloud_cover', 'total_precipitation', 'evaporation', 'boundary_layer_height', 'modis_evi',  'temp_875',  'surface_net_solar_radiation', 'surface_net_thermal_radiation', 's_humidity_875',
     'merra_pm2.5', 'omi_no2', 'modis_lst',
-    'fraction_water', 'fraction_vegetation', 'fraction_cropland', 'fraction_wetland', 'fraction_forest', 'fraction_urban',]
+    'fraction_water',  'fraction_wetland', 'fraction_urban', 'frac_vegc']
     
     features = features[feature_abbrv]
 
@@ -243,10 +243,10 @@ lons = np.array(lons)
 print(preds.shape)
 print(lats.shape)
 print(lons.shape)
-
+"""
 ############################################################################
 # the raster output layer
-output_file = outputfilename
+# output_file = outputfilename
 srs = osr.SpatialReference()
 srs.ImportFromEPSG(4326)
 xres = 0.0270
@@ -255,7 +255,6 @@ nrows = 601 # NCR 17 PH 601
 ncols = 359 # NCR 10 PH 359
 nbands = 1461
 noData = -9999
-ncells = 94
 array = np.empty((nrows, ncols), dtype=np.float32)
 
 xmin,ymin,xmax,ymax = [lons.min()-xres/2, lats.min()-yres/2,lons.max()+xres/2, lats.max()+yres/2]
@@ -283,7 +282,68 @@ for i in range(nbands):
     output_raster.GetRasterBand(i+1).SetNoDataValue(noData)
 
 del output_raster
+############################################################################
 """
+
+# the MEAN raster output layer
+output_file= '/home/dwight.velasco/scratch1/THESIS/Renders/PH-raster-v5-mean.tif'
+srs = osr.SpatialReference()
+srs.ImportFromEPSG(4326)
+xres = 0.0270
+yres = 0.0270
+nrows = 601 # NCR 17 PH 601
+ncols = 359 # NCR 10 PH 359
+nbands = 1
+noData = -9999
+array = np.empty((nrows, ncols), dtype=np.float32)
+
+predssqueeze = list(itertools.chain.from_iterable(preds))
+print(np.mean(predssqueeze))
+preds_means = np.mean(preds, axis=1)
+preds_means = np.array(preds_means)
+print(preds_means.shape)
+print("Mean of preds means", np.mean(preds_means))
+print("Col len",len(preds[1,:]))
+print("Row len",len(preds[:,1460]))
+
+print("2015:",len(np.mean(preds[:,:365], axis=0)))
+print("2015:",np.mean(np.mean(preds[:,:365], axis=0)))
+print("2016:",len(np.mean(preds[:,365:731], axis=0)))
+print("2016:",np.mean(np.mean(preds[:,365:731], axis=0)))
+print("2017:",len(np.mean(preds[:,731:1096], axis=0)))
+print("2017:",np.mean(np.mean(preds[:,731:1096], axis=0)))
+print("2018:",len(np.mean(preds[:,1096:], axis=0)))
+print("2018:",np.mean(np.mean(preds[:,1096:], axis=0)))
+
+# sys.exit("Error message")
+
+xmin,ymin,xmax,ymax = [lons.min()-xres/2, lats.min()-yres/2,lons.max()+xres/2, lats.max()+yres/2]
+geotransform=(xmin, xres, 0, ymax, 0, -yres)
+
+output_raster = gdal.GetDriverByName('GTiff').Create(output_file, ncols, nrows, nbands, gdal.GDT_Float32)  # Open the file
+output_raster.SetGeoTransform(geotransform)
+output_raster.SetProjection(srs.ExportToWkt())
+
+# Loop bands
+for i in range(nbands):
+    # Init array with nodata
+    array[:] = noData
+    # Loop lat/lons inc. index j
+    for j, (lon, lat) in enumerate(zip(lons, lats)):
+        # Calc x, y pixel index
+        x = math.floor((lon - xmin) / xres)
+        y = math.floor((lat - ymin) / yres)
+
+        # Fill the array at y, x with the value from predictions at band i, index j 
+        array[y, x] = preds_means[j]
+        
+    array = np.flipud(array)
+    output_raster.GetRasterBand(i+1).WriteArray(array)
+    output_raster.GetRasterBand(i+1).SetNoDataValue(noData)
+
+del output_raster
+
+
 print(index)
 end_time = time.time()
 print("\nTime: ", end_time - start_time)
