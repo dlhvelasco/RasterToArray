@@ -8,6 +8,7 @@ __pycache__/*
 *.tif
 plots/*
 old-codes/*
-*.dat
+old-unordered-models/*
+old-ordered-models/*
 rf*.txt
 xgb*.txt

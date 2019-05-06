@@ -55,8 +55,8 @@ with open(ncr) as f:
 lencoords = len(coordinates)
 # ! CHANGE MODEL AND OUTPUTNAME
 data = 'xgb'
-best_model = pickle.load(open("model-v73-norh-vegc-nocrop.dat", "rb"))
-outputfilename = '/home/dwight.velasco/scratch1/THESIS/Renders/NCR-v73-norh-vegc-nocrop.tif'
+best_model = pickle.load(open("model-v74-3057-seed69.dat", "rb"))
+outputfilename = '/home/dwight.velasco/scratch1/THESIS/Renders/NCR-v74-3057-seed69.tif'
 
 landcover_csv = [
 "/home/dwight.velasco/scratch1/THESIS/MCD12Q1/115_xy_LC2.csv", 
@@ -238,7 +238,6 @@ nrows = 17 # NCR 17 PH 601
 ncols = 10 # NCR 10 PH 359
 nbands = 1461
 noData = -9999
-ncells = 94 # ???
 array = np.empty((nrows, ncols), dtype=np.float32)
 
 xmin,ymin,xmax,ymax = [lons.min()-xres/2, lats.min()-yres/2,lons.max()+xres/2, lats.max()+yres/2]

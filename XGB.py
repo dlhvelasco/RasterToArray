@@ -97,8 +97,7 @@ fullData = fullData[feature_abbrv] # Reordering of columns
 feature_list = list(fullData.columns)
 features = np.array(fullData)
 
-train_features, test_features, train_labels, test_labels = train_test_split(features, labels, test_size = 2922, random_state = 42)
-test_labels[test_labels > 240] = 50
+train_features, test_features, train_labels, test_labels = train_test_split(features, labels, test_size = 3057, random_state = 69)
 
 feature_flist = ['f%d'%idx for idx in range(0,len(feature_abbrv))]
 df_train_features = pd.DataFrame(train_features, columns=feature_flist)
@@ -127,23 +126,25 @@ params = {
 # feature_monotones = [0]*(len(feature_list))
 # monotone_constraints='(' + ','.join([str(m) for m in feature_monotones]) + ')',
 
-xgb = XGBRegressor(random_state=42, n_jobs=8,max_depth=11, min_child_weight=2, gamma=0, subsample=0.9, colsample_bytree=0.9, colsample_bynode=0.9,reg_alpha=0.001, reg_lambda=1, learning_rate=0.05, n_estimators=2500, importance_type="gain")
+xgb = XGBRegressor(random_state=42, n_jobs=8,max_depth=11, min_child_weight=2, gamma=0, subsample=0.9, colsample_bytree=0.9, colsample_bynode=0.9, reg_alpha=0.001, reg_lambda=1, learning_rate=0.05, n_estimators=2500, importance_type="gain")
 
-kf = KFold(n_splits = 3, shuffle = True, random_state = 42)
-random_search = RandomizedSearchCV(xgb, params, scoring='neg_mean_absolute_error', n_iter=27, random_state=42, cv=kf.split(train_features, train_labels), verbose=20, n_jobs=8, iid=False)
+# kf = KFold(n_splits = 3, shuffle = True, random_state = 42)
+# random_search = RandomizedSearchCV(xgb, params, scoring='neg_mean_absolute_error', n_iter=33, random_state=42, cv=kf.split(train_features, train_labels), verbose=20, n_jobs=8, iid=False)
 # random_search = GridSearchCV(xgb, params, scoring='neg_mean_absolute_error', cv=kf.split(train_features, train_labels), verbose=12, n_jobs=8, iid=False)
 
-# random_search = xgb
-random_search.fit(train_features, train_labels)
+random_search = xgb
+# random_search.fit(train_features, train_labels)
 
-print(random_search.best_params_)
-print(random_search.best_estimator_)
-best_model = random_search.best_estimator_
+# print(random_search.best_params_)
+# print(random_search.best_estimator_)
+# best_model = random_search.best_estimator_
 
-# best_model = random_search
-# pickle.dump(best_model, open("model-v73-norh-vegc-nocrop.dat", "wb"))
-# best_model = pickle.load(open("model-v72-norh-vegc.dat", "rb"))
-# print(best_model.get_params)
+best_model = random_search
+# pickle.dump(best_model, open("model-v74-3057-seed69.dat", "wb"))
+best_model = pickle.load(open("model-v74-3057-seed69.dat", "rb"))
+print(best_model.get_params(deep=True))
+print(best_model.get_xgb_params)
+
 
 predictions = best_model.predict(test_features) # predictions size determined by test_feature size
 
@@ -175,7 +176,7 @@ plt.barh(range(train_features.shape[1]), importances2[indices], color='#6e9be5',
 plt.yticks(range(train_features.shape[1]), [feature_names[i] for i in indices])
 plt.ylim([-1, train_features.shape[1]])
 plt.tight_layout()
-plt.savefig("/home/dwight.velasco/scratch1/THESIS/Renders/SP-PH/importances.png")
+plt.savefig("/home/dwight.velasco/scratch1/THESIS/Renders/SP-PH/importances-cover.png")
 # sys.exit("Error message")
 
 test_labels = np.array(test_labels)
@@ -200,11 +201,11 @@ ax.plot(lims, lims, 'k--', alpha=0.75)
 ax.set_aspect('equal')
 ax.set_xlim(lims)
 ax.set_ylim(lims)
-ax.set_xlabel('Observed PM2.5 values (µg/$\mathregular{m^3}$)', fontsize=18)
-ax.set_ylabel('Predicted PM2.5 values (µg/$\mathregular{m^3}$)', fontsize=18) 
+ax.set_xlabel('Observed $\mathregular{PM_{2.5}}$ values (µg/$\mathregular{m^3}$)', fontsize=18)
+ax.set_ylabel('Predicted $\mathregular{PM_{2.5}}$ values (µg/$\mathregular{m^3}$)', fontsize=18) 
 ax.tick_params(axis='both', which='major', labelsize=14)
 ax.plot(np.unique(test_labels), np.poly1d(np.polyfit(test_labels, predictions, 1))(np.unique(test_labels)), 'k-')
-ax.text(233, 1, 'N = 2922    \n$\mathregular{R^2}$ = 0.87$\,\,\,\,\,\,\,\,\,$ \nMAE = 7.55     \nRMSE = 12.12   \nsMAPE = 29.34%', horizontalalignment='right', fontsize=16)
+ax.text(233, 1, 'N = 3057    \n$\mathregular{R^2}$ = 0.87$\,\,\,\,\,\,\,\,\,$ \nMAE = 7.49     \nRMSE = 12.10   \nsMAPE = 29.72%', horizontalalignment='right', fontsize=16)
 plt.tight_layout()
 plt.savefig("/home/dwight.velasco/scratch1/THESIS/Renders/SP-PH/predictionsXGB.png")
 
@@ -272,30 +273,31 @@ for idx, f in enumerate(pdp_names):
 print("Printing contour plots...")
 # * grid_type: 'equal', 'percentile'
 
-pdp_water = pdp.pdp_isolate(model=best_model, dataset=df_train_features, model_features=feature_flist, feature='f23', num_grid_points=10, grid_type='equal', n_jobs=32)
-fig, axes = pdp.pdp_plot(pdp_water, 'Fraction of water area', plot_lines=True, frac_to_plot=100, x_quantile=True, plot_pts_dist=True, show_percentile=True)
-plt.savefig("/home/dwight.velasco/scratch1/THESIS/Renders/SP-PH/pdp-water-equal.png")
+pdp_pop = pdp.pdp_isolate(model=best_model, dataset=df_train_features, model_features=feature_flist, feature='f2', num_grid_points=11, n_jobs=32)
+fig, axes = pdp.pdp_plot(pdp_pop, 'Median population', plot_lines=True, frac_to_plot=100, x_quantile=True, plot_pts_dist=True, show_percentile=True)
+plt.savefig("/home/dwight.velasco/scratch1/THESIS/Renders/SP-PH/pdp-population.png")
 plt.close()
 
-pdp_pop = pdp.pdp_isolate(model=best_model, dataset=df_train_features, model_features=feature_flist, feature='f2', num_grid_points=10, grid_type='equal', n_jobs=32)
-fig, axes = pdp.pdp_plot(pdp_pop, 'Population', plot_lines=True, frac_to_plot=100, x_quantile=True, plot_pts_dist=True, show_percentile=True)
-plt.savefig("/home/dwight.velasco/scratch1/THESIS/Renders/SP-PH/pdp-population-equal.png")
-plt.close()
-
-pdp_vegetation = pdp.pdp_isolate(model=best_model, dataset=df_train_features, model_features=feature_flist, feature='f27', num_grid_points=10, grid_type='equal', n_jobs=32)
+pdp_vegetation = pdp.pdp_isolate(model=best_model, dataset=df_train_features, model_features=feature_flist, feature='f26', num_grid_points=11, n_jobs=32)
 fig, axes = pdp.pdp_plot(pdp_vegetation, 'Fraction of vegetated area', plot_lines=True, frac_to_plot=100, x_quantile=True, plot_pts_dist=True, show_percentile=True)
-plt.savefig("/home/dwight.velasco/scratch1/THESIS/Renders/SP-PH/pdp-vegetation-equal.png")
+plt.savefig("/home/dwight.velasco/scratch1/THESIS/Renders/SP-PH/pdp-vegetation.png")
 plt.close()
 
-pdp_cropland = pdp.pdp_isolate(model=best_model, dataset=df_train_features, model_features=feature_flist, feature='f24', num_grid_points=10, grid_type='equal', n_jobs=32)
-fig, axes = pdp.pdp_plot(pdp_cropland, 'Fraction of cropland area', plot_lines=True, frac_to_plot=100, x_quantile=True, plot_pts_dist=True, show_percentile=True)
-plt.savefig("/home/dwight.velasco/scratch1/THESIS/Renders/SP-PH/pdp-cropland-equal.png")
-plt.close()
-
-pdp_urban = pdp.pdp_isolate(model=best_model, dataset=df_train_features, model_features=feature_flist, feature='f26', num_grid_points=10, grid_type='equal', n_jobs=32)
+pdp_urban = pdp.pdp_isolate(model=best_model, dataset=df_train_features, model_features=feature_flist, feature='f25', num_grid_points=11, n_jobs=32)
 fig, axes = pdp.pdp_plot(pdp_urban, 'Fraction of urban area', plot_lines=True, frac_to_plot=100, x_quantile=True, plot_pts_dist=True, show_percentile=True)
-plt.savefig("/home/dwight.velasco/scratch1/THESIS/Renders/SP-PH/pdp-urban-equal.png")
+plt.savefig("/home/dwight.velasco/scratch1/THESIS/Renders/SP-PH/pdp-urban.png")
+plt.close()
+
+pdp_water = pdp.pdp_isolate(model=best_model, dataset=df_train_features, model_features=feature_flist, feature='f23', num_grid_points=11, n_jobs=32)
+fig, axes = pdp.pdp_plot(pdp_water, 'Fraction of water area', plot_lines=True, frac_to_plot=100, x_quantile=True, plot_pts_dist=True, show_percentile=True)
+plt.savefig("/home/dwight.velasco/scratch1/THESIS/Renders/SP-PH/pdp-water.png")
+plt.close()
+
+pdp_wetland = pdp.pdp_isolate(model=best_model, dataset=df_train_features, model_features=feature_flist, feature='f24', num_grid_points=11, n_jobs=32)
+fig, axes = pdp.pdp_plot(pdp_wetland, 'Fraction of wetland area', plot_lines=True, frac_to_plot=100, x_quantile=True, plot_pts_dist=True, show_percentile=True)
+plt.savefig("/home/dwight.velasco/scratch1/THESIS/Renders/SP-PH/pdp-wetland.png")
 plt.close()
 """
+
 end_time = time.time()
 print("\nTime: ", end_time - start_time)

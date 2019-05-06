@@ -22,6 +22,9 @@ import multiprocessing
 import itertools
 import math
 from string import ascii_lowercase
+import matplotlib.pyplot as plt
+import seaborn as sns; sns.set()
+import pandas as pd
 
 # shapely.speedups.enable()
 
@@ -56,8 +59,8 @@ with open(gcen) as f:
 lencoords = len(coordinates)
 # ! CHANGE MODEL AND OUTPUTNAME
 data = 'xgb'
-best_model = pickle.load(open("model-v73-norh-vegc-nocrop.dat", "rb"))
-outputfilename = '/home/dwight.velasco/scratch1/THESIS/Renders/PH-raster-v5.tif'
+best_model = pickle.load(open("model-v74-3057-seed69.dat", "rb"))
+outputfilename = '/home/dwight.velasco/scratch1/THESIS/Renders/PH-raster-v6.tif'
 
 landcover_csv = [
 "/home/dwight.velasco/scratch1/THESIS/MCD12Q1/115_xy_LC2.csv", 
@@ -212,7 +215,7 @@ pickle.dump(lons, open("/home/dwight.velasco/scratch1/THESIS/Grid/gcens_cleaner/
 ############################################################################
 # Merging preds/lats/lons
 letterlist = [letter for letter in ascii_lowercase]
-# letterlist.append('zzz')
+# //letterlist.append('zzz')
 
 for letter2 in letterlist:
     print("xa%s" % letter2)
@@ -246,7 +249,7 @@ print(lons.shape)
 """
 ############################################################################
 # the raster output layer
-# output_file = outputfilename
+output_file = outputfilename
 srs = osr.SpatialReference()
 srs.ImportFromEPSG(4326)
 xres = 0.0270
@@ -284,9 +287,8 @@ for i in range(nbands):
 del output_raster
 ############################################################################
 """
-
 # the MEAN raster output layer
-output_file= '/home/dwight.velasco/scratch1/THESIS/Renders/PH-raster-v5-mean.tif'
+output_file= '/home/dwight.velasco/scratch1/THESIS/Renders/PH-raster-v6-mean.tif'
 srs = osr.SpatialReference()
 srs.ImportFromEPSG(4326)
 xres = 0.0270
@@ -298,7 +300,18 @@ noData = -9999
 array = np.empty((nrows, ncols), dtype=np.float32)
 
 predssqueeze = list(itertools.chain.from_iterable(preds))
-print(np.mean(predssqueeze))
+print(len(predssqueeze))
+print("Mean squeeze:",np.mean(predssqueeze))
+
+# plt.figure(figsize=(16,9))
+# distplot = sns.distplot(predssqueeze, hist = False, kde = True)
+# plt.xlabel('$\mathregular{PM_{2.5}}$ concentration')
+# plt.ylabel('Density')
+# plt.tight_layout()
+# plt.savefig("/home/dwight.velasco/scratch1/THESIS/Renders/SP-PH/preds-dist.png")
+
+
+
 preds_means = np.mean(preds, axis=1)
 preds_means = np.array(preds_means)
 print(preds_means.shape)
@@ -315,7 +328,34 @@ print("2017:",np.mean(np.mean(preds[:,731:1096], axis=0)))
 print("2018:",len(np.mean(preds[:,1096:], axis=0)))
 print("2018:",np.mean(np.mean(preds[:,1096:], axis=0)))
 
-# sys.exit("Error message")
+monthstart = [0,31,59,90,120,151,181,212,243,273,304,334]
+leapstart = [0,31,60,91,121,152,182,213,244,274,305,335]
+
+monthlist = [[] for _ in range(12)]
+
+for monidx, month in enumerate(monthstart):
+    print("2015:",len(np.mean(preds[:,0+month:365], axis=0)))
+    print("2015:",np.mean(np.mean(preds[:,0+month:365], axis=0)))
+    monthlist[monidx].append(np.mean(np.mean(preds[:,0+month:365], axis=0)))
+
+    print("2017:",len(np.mean(preds[:,731+month:1096], axis=0)))
+    print("2017:",np.mean(np.mean(preds[:,731+month:1096], axis=0)))
+    monthlist[monidx].append(np.mean(np.mean(preds[:,731+month:1096], axis=0)))
+
+    print("2018:",len(np.mean(preds[:,1096+month:], axis=0)))
+    print("2018:",np.mean(np.mean(preds[:,1096+month:], axis=0)))
+    monthlist[monidx].append(np.mean(np.mean(preds[:,1096+month:], axis=0)))
+
+for monidx2, month2 in enumerate(leapstart):
+    print("2016:",len(np.mean(preds[:,365+month2:731], axis=0)))
+    print("2016:",np.mean(np.mean(preds[:,365+month2:731], axis=0)))
+    monthlist[monidx2].append(np.mean(np.mean(preds[:,365+month2:731], axis=0)))
+
+print([len(month) for month in monthlist])
+meanmonthlist = [np.mean(month) for month in monthlist]
+print(meanmonthlist)
+
+sys.exit("Error message")
 
 xmin,ymin,xmax,ymax = [lons.min()-xres/2, lats.min()-yres/2,lons.max()+xres/2, lats.max()+yres/2]
 geotransform=(xmin, xres, 0, ymax, 0, -yres)

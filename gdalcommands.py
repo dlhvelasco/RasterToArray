@@ -138,5 +138,47 @@ import glob
 
 
 ############################################################################
-# gdal_calc.py --calc="mean(A,dtype=float32)" --type="Float32" --overwrite --NoDataValue=-9999 --allBands=A --outfile '/home/dwight.velasco/scratch1/THESIS/Renders/PH-raster-v5-mean.tif'  -A  '/home/dwight.velasco/scratch1/THESIS/Renders/PH-raster-v5.tif' 
+# gdal_calc.py --calc="mean(A,dtype=float32)" --type="Float32" --overwrite --NoDataValue=-9999 --allBands=A --outfile '/home/dwight.velasco/scratch1/THESIS/Renders/PH-raster-v6-mean.tif'  -A  '/home/dwight.velasco/scratch1/THESIS/Renders/PH-raster-v6.tif' 
+############################################################################
+
+
+############################################################################
+# raster calculator: PH-raster-v6-mean@1 > 25.00000000000
+
+# gdal_calc.py --overwrite -A /home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/PH_raster_v6_mean_25.tif --outfile=/home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/PH_raster_v6_mean_25b.tif --calc="A*(A>0)" --NoDataValue=0
+
+# polygonize PH_raster_v6_mean_25b
+# apply -0.000001 buffer > PH_vector_25.shp
+
+# gdalwarp -srcnodata -2147483647 -dstnodata -2147483647 -multi -wo NUM_THREADS=ALL_CPUS -wo CUTLINE_ALL_TOUCHED=TRUE -overwrite -crop_to_cutline -cutline /home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/PH_vector_25.shp /home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/2018b_pop.tif /home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/2018b-exposed25.tif
+
+# raster layer statistics > sum
+############################################################################
+
+
+############################################################################
+# raster calculator: PH-raster-v6-mean@1 <= 25.00000000000
+
+# gdal_calc.py --overwrite -A /home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/PH_safe25.tif --outfile=/home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/PH_safe25b.tif --calc="A*(A>0)" --NoDataValue=0
+
+# polygonize PH_safe25b
+# apply -0.000001 buffer > PH_vector_safe25.shp
+
+# gdalwarp -srcnodata -2147483647 -dstnodata -2147483647 -multi -wo NUM_THREADS=ALL_CPUS -wo CUTLINE_ALL_TOUCHED=TRUE -overwrite -crop_to_cutline -cutline /home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/PH_vector_safe25.shp /home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/2018b_pop.tif /home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/2018b_safe25.tif
+
+# Zonal Stats > (sum/province) / (total/province) 
+# NoDataValue: -2147483647
+############################################################################
+
+
+############################################################################
+# raster calculator: 2018c@1 >= 10.00000000000
+
+# gdal_calc.py --overwrite -A /home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/2018c-nozeros.tif --outfile=/home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/2018c-nozeros.tif --calc="A*(A>0)" --NoDataValue=0
+
+# polygonize 2018c-nozeros
+# apply -0.000001 buffer > 2018c-nozeros.shp
+
+# gdalwarp -srcnodata -9999 -dstnodata -9999 -multi -wo NUM_THREADS=ALL_CPUS -wo CUTLINE_ALL_TOUCHED=FALSE -overwrite -crop_to_cutline -cutline /home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/2018c-nozeros.shp /home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/PH-raster-v6-mean.tif /home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/PH-raster-v6-mean-nozeros.tif
+
 ############################################################################
