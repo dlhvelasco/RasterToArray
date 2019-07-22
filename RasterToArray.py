@@ -124,8 +124,9 @@ def GetPixelValue(dsstore, coordinates):
 population = (filename + 'LandScan/Population.tif', 1, 0, '1/1/2015', 'AS')
 modis_evi = (filename + 'MYD13C1/MODIS_EVI4326.tif', 0.0001, 0, '12/27/2014', '16D')
 viirs_dnb = (filename + 'VIIRS/DNB/1518.tif', 1, 0, '1/1/2015', 'MS')
+srtm = (filename + 'SRTM/Philippines_SRTM_3kmc.tif', 1, 0, '1/1/2015', 'AS')
 
-predictors2 = [population, modis_evi, viirs_dnb]
+predictors2 = [population, modis_evi, viirs_dnb, srtm]
 
 
 def RasterToArrayDate():

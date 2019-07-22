@@ -19,7 +19,7 @@ filepath = '/home/dwight.velasco/scratch1/THESIS/GroundPM/'
 
 coordinates = [
     (14.4500650,120.9943758, filepath+'NCR/Las_Pinas.csv'),
-    (14.5645950,121.0559080, filepath+'NCR/Makati_Pasig.csv'),
+    (14.5645950,121.0559080, filepath+'NCR/Pasig.csv'),
     (14.5833967,121.0368167, filepath+'NCR/Mandaluyong.csv'),
     (14.6334111,121.0998333, filepath+'NCR/Marikina.csv'),
     (14.3834944,121.0336750, filepath+'NCR/Muntinlupa.csv'),
@@ -43,7 +43,8 @@ coordinates = [
     (14.3160000,121.1098056, filepath+'R4A/StaRosaDaily.csv'),
     (14.3125000,121.0783333, filepath+'R4A/BinanDaily.csv'),
     (09.7775000,118.7341667, filepath+'R4B/MIMAROPA_1518.csv'), 
-    (13.1658500,123.7516667, filepath+'R5/R51518.csv'),
+    # (13.1658500,123.7516667, filepath+'R5/R51518.csv'),
+    (13.1472390,123.7528460, filepath+'R5/R51518.csv'), # Legazpi Population fix
     (10.6586667,122.9666389, filepath+'R6/Bacolod.csv'),
     (10.6989778,122.5639639, filepath+'R6/IloiloDaily.csv'),
     (10.7854444,122.5904167, filepath+'R6/Leganes.csv'),
@@ -95,10 +96,11 @@ landcover_csv = [
 "/home/dwight.velasco/scratch1/THESIS/MCD12Q1/116_xy_LC2.csv",
 "/home/dwight.velasco/scratch1/THESIS/MCD12Q1/117_xy_LC2.csv", 
 "/home/dwight.velasco/scratch1/THESIS/MCD12Q1/118_xy_LC2.csv"
-] # LC2: fixed veg, +wetland, +cropland
+] 
+# LC2: fixed veg, +wetland, +cropland
+# LC3: split cropland
 
 landcover_types = ['fraction_forest', 'fraction_vegetation', 'fraction_wetland','fraction_cropland','fraction_urban', 'fraction_water']
-
 
 def GetTraining(data):
     for cy, cx, csvfile in coordinates:
@@ -147,6 +149,7 @@ def GetTraining(data):
         training['population'] = ""
         training['modis_evi'] = ""
         training['viirs_dnb'] = ""
+        training['elevation'] = ""
 
         training['datetime'] = pd.to_datetime(training['Date'])
         training = training.set_index('datetime')
@@ -171,6 +174,7 @@ def GetTraining(data):
         training['population'].replace("",np.nan, inplace=True)
         training['modis_evi'].replace("",np.nan, inplace=True)
         training['viirs_dnb'].replace("",np.nan, inplace=True)
+        training['elevation'].replace("",np.nan, inplace=True)
 
         training['fraction_forest'].replace("",np.nan, inplace=True)
         training['fraction_vegetation'].replace("",np.nan, inplace=True)
@@ -182,6 +186,7 @@ def GetTraining(data):
         training['population'].fillna(method='ffill', inplace=True)
         training['modis_evi'].fillna(method='ffill', inplace=True)
         training['viirs_dnb'].fillna(method='ffill', inplace=True)
+        training['elevation'].fillna(method='ffill', inplace=True)
 
         training['fraction_forest'].fillna(method='ffill', inplace=True)
         training['fraction_vegetation'].fillna(method='ffill', inplace=True)

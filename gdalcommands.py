@@ -90,6 +90,14 @@ import glob
 # gdalwarp -multi -wo NUM_THREADS=ALL_CPUS -wo CUTLINE_ALL_TOUCHED=TRUE -overwrite -srcnodata -2147483647 -dstnodata -2147483647 -crop_to_cutline -cutline  /home/dwight.velasco/dwight.velasco/scratch1/THESIS/RasterToArray/modisgrid/Clean-PHGridmap.shp 2018.tif 2018b.tif && gdalwarp -s_srs EPSG:4326 -srcnodata -2147483647 -dstnodata -2147483647 -t_srs epsg:4326 -te 116.916 4.623 126.636 20.877 -te_srs EPSG:4326 -tr 0.0270 0.0270 -r bilinear -multi -wo NUM_THREADS=ALL_CPUS -overwrite 2018b.tif 2018c.tif
 
 # gdalbuildvrt -resolution highest -separate -overwrite Population.vrt /home/dwight.velasco/dwight.velasco/scratch1/THESIS/LandScan/*c.tif && gdal_translate --config GDAL_CACHEMAX 1024 -of GTiff -a_srs EPSG:4326 -co NUM_THREADS=ALL_CPUS Population.vrt Population.tif && gdal_calc.py -A Population.tif --outfile=Population.tif --overwrite --calc="A*(A>0)" --NoDataValue=0 --allBands=A
+
+# *Landscan no zeroes; bad result see mean-v7
+# (("2015c@1" = 0.0)  * 1) + (("2015c@1" != 0.0)  * "2015c@1")
+# (("2016c@1" = 0.0)  * 1) + (("2016c@1" != 0.0)  * "2016c@1")
+# (("2017c@1" = 0.0)  * 1) + (("2017c@1" != 0.0)  * "2017c@1")
+# (("2018c@1" = 0.0)  * 1) + (("2018c@1" != 0.0)  * "2018c@1")
+
+# gdalbuildvrt -resolution highest -separate -overwrite /home/dwight.velasco/dwight.velasco/scratch1/THESIS/LandScan/Populationnz.vrt /home/dwight.velasco/dwight.velasco/scratch1/THESIS/LandScan/*cnz.tif && gdal_translate --config GDAL_CACHEMAX 1024 -of GTiff -a_srs EPSG:4326 -co NUM_THREADS=ALL_CPUS /home/dwight.velasco/dwight.velasco/scratch1/THESIS/LandScan/Populationnz.vrt /home/dwight.velasco/dwight.velasco/scratch1/THESIS/LandScan/Populationnz.tif && gdal_calc.py -A /home/dwight.velasco/dwight.velasco/scratch1/THESIS/LandScan/Populationnz.tif --outfile=/home/dwight.velasco/dwight.velasco/scratch1/THESIS/LandScan/Populationnz.tif --overwrite --calc="A*(A>0)" --NoDataValue=0 --allBands=A
 ############################################################################
 
 
@@ -143,20 +151,22 @@ import glob
 
 
 ############################################################################
+# *Percent pop exposed to >25
 # raster calculator: PH-raster-v6-mean@1 > 25.00000000000
 
-# gdal_calc.py --overwrite -A /home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/PH_raster_v6_mean_25.tif --outfile=/home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/PH_raster_v6_mean_25b.tif --calc="A*(A>0)" --NoDataValue=0
+# gdal_calc.py --overwrite -A /home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/PH-raster-v11.3-noelevpaLC-mean-25.tif --outfile=/home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/PH-raster-v11.3-noelevpaLC-mean-25b.tif --calc="A*(A>0)" --NoDataValue=0
 
 # polygonize PH_raster_v6_mean_25b
 # apply -0.000001 buffer > PH_vector_25.shp
 
-# gdalwarp -srcnodata -2147483647 -dstnodata -2147483647 -multi -wo NUM_THREADS=ALL_CPUS -wo CUTLINE_ALL_TOUCHED=TRUE -overwrite -crop_to_cutline -cutline /home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/PH_vector_25.shp /home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/2018b_pop.tif /home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/2018b-exposed25.tif
+# gdalwarp -srcnodata -2147483647 -dstnodata -2147483647 -multi -wo NUM_THREADS=ALL_CPUS -wo CUTLINE_ALL_TOUCHED=TRUE -overwrite -crop_to_cutline -cutline /home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/PH_vector_25_v11.3.shp /home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/2018b_pop.tif /home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/2018b-exposed25.tif
 
 # raster layer statistics > sum
 ############################################################################
 
 
 ############################################################################
+# *Percent pop safe
 # raster calculator: PH-raster-v6-mean@1 <= 25.00000000000
 
 # gdal_calc.py --overwrite -A /home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/PH_safe25.tif --outfile=/home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/PH_safe25b.tif --calc="A*(A>0)" --NoDataValue=0
@@ -164,7 +174,7 @@ import glob
 # polygonize PH_safe25b
 # apply -0.000001 buffer > PH_vector_safe25.shp
 
-# gdalwarp -srcnodata -2147483647 -dstnodata -2147483647 -multi -wo NUM_THREADS=ALL_CPUS -wo CUTLINE_ALL_TOUCHED=TRUE -overwrite -crop_to_cutline -cutline /home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/PH_vector_safe25.shp /home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/2018b_pop.tif /home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/2018b_safe25.tif
+# gdalwarp -srcnodata -2147483647 -dstnodata -2147483647 -multi -wo NUM_THREADS=ALL_CPUS -wo CUTLINE_ALL_TOUCHED=TRUE -overwrite -crop_to_cutline -cutline /home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/PH_vector_safe25_v11.3.shp /home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/2018b_pop.tif /home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/2018b_safe25.tif
 
 # Zonal Stats > (sum/province) / (total/province) 
 # NoDataValue: -2147483647
@@ -172,6 +182,7 @@ import glob
 
 
 ############################################################################
+# *Nozeros test; not worth
 # raster calculator: 2018c@1 >= 10.00000000000
 
 # gdal_calc.py --overwrite -A /home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/2018c-nozeros.tif --outfile=/home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/2018c-nozeros.tif --calc="A*(A>0)" --NoDataValue=0
@@ -180,5 +191,13 @@ import glob
 # apply -0.000001 buffer > 2018c-nozeros.shp
 
 # gdalwarp -srcnodata -9999 -dstnodata -9999 -multi -wo NUM_THREADS=ALL_CPUS -wo CUTLINE_ALL_TOUCHED=FALSE -overwrite -crop_to_cutline -cutline /home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/2018c-nozeros.shp /home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/PH-raster-v6-mean.tif /home/dwight.velasco/dwight.velasco/scratch1/THESIS/Renders/Limits_calculation/PH-raster-v6-mean-nozeros.tif
+############################################################################
 
+
+############################################################################
+# *SRTM
+
+# gdalwarp -s_srs EPSG:4326 -srcnodata 32767 -dstnodata 32767 -t_srs epsg:4326 -te 116.916 4.623 126.636 20.877 -te_srs EPSG:4326 -tr 0.0270 0.0270 -r bilinear -multi -wo NUM_THREADS=ALL_CPUS -overwrite /home/dwight.velasco/scratch1/THESIS/SRTM/Philippines_SRTM.tif /home/dwight.velasco/scratch1/THESIS/SRTM/Philippines_SRTM_3km.tif 
+
+# gdalbuildvrt -resolution highest -separate -overwrite /home/dwight.velasco/scratch1/THESIS/SRTM/Philippines_SRTM_3kmc.vrt /home/dwight.velasco/scratch1/THESIS/SRTM/*copy.tif && gdal_translate --config GDAL_CACHEMAX 1024 -of GTiff -a_srs EPSG:4326 -co NUM_THREADS=ALL_CPUS /home/dwight.velasco/scratch1/THESIS/SRTM/Philippines_SRTM_3kmc.vrt /home/dwight.velasco/scratch1/THESIS/SRTM/Philippines_SRTM_3kmc.tif
 ############################################################################

@@ -59,8 +59,8 @@ with open(gcen) as f:
 lencoords = len(coordinates)
 # ! CHANGE MODEL AND OUTPUTNAME
 data = 'xgb'
-best_model = pickle.load(open("model-v74-3057-seed69.dat", "rb"))
-outputfilename = '/home/dwight.velasco/scratch1/THESIS/Renders/PH-raster-v6.tif'
+best_model = pickle.load(open("model-v83.2-noelevpaLC.dat", "rb"))
+outputfilename = '/home/dwight.velasco/scratch1/THESIS/Renders/PH-raster-v11.3-noelevpaLC.tif'
 
 landcover_csv = [
 "/home/dwight.velasco/scratch1/THESIS/MCD12Q1/115_xy_LC2.csv", 
@@ -68,16 +68,16 @@ landcover_csv = [
 "/home/dwight.velasco/scratch1/THESIS/MCD12Q1/117_xy_LC2.csv", 
 "/home/dwight.velasco/scratch1/THESIS/MCD12Q1/118_xy_LC2.csv"
 ] # LC2: fixed veg, +wetland, +cropland
+# LC3: split cropland
 
 landcover_types = [
 # 'fraction_cropland', 
-'fraction_forest', 
-'fraction_vegetation',
-'fraction_wetland',
-'fraction_urban',
-'fraction_water',
+# 'fraction_forest', 
+# 'fraction_vegetation',
+# 'fraction_wetland',
+# 'fraction_urban',
+# 'fraction_water',
 ]
-
 """
 for cooordidx, (cy, cx) in enumerate(coordinates):
     print("\nProcessing: %d/%d ..." %(cooordidx+1, lencoords))
@@ -120,6 +120,7 @@ for cooordidx, (cy, cx) in enumerate(coordinates):
     features['population'] = ""
     features['modis_evi'] = ""
     features['viirs_dnb'] = ""
+    features['elevation'] = ""
     
     features['datetime'] = pd.to_datetime(features['Date'])
     features = features.set_index('datetime')
@@ -129,38 +130,40 @@ for cooordidx, (cy, cx) in enumerate(coordinates):
         for date in range(len(dates)):
             features.loc[features.index == dates[date], features.columns[idx-len(storedarrayDate.listlisteddates)]] = storedarrayDate.listlistedvals[idx][date]
 
-    features['fraction_forest'] = ""
-    features['fraction_vegetation'] = ""
-    features['fraction_wetland'] = ""
+    # features['fraction_forest'] = ""
+    # features['fraction_vegetation'] = ""
+    # features['fraction_wetland'] = ""
     # features['fraction_cropland'] = ""
-    features['fraction_urban'] = ""
-    features['fraction_water'] = ""
-    # ! SET PROPERLY
-    for landcover_type in landcover_types:
-        for idx, year in enumerate(range(2015,2019)):
-            df = pd.read_csv(landcover_csv[idx], index_col=0)
-            features.loc[features.index == '%d-01-01'%year, landcover_type] = float(df.loc[df['px-py'] == '(%d, %d)' %(px,py), landcover_type])
+    # features['fraction_urban'] = ""
+    # features['fraction_water'] = ""
+    # # ! SET PROPERLY
+    # for landcover_type in landcover_types:
+    #     for idx, year in enumerate(range(2015,2019)):
+    #         df = pd.read_csv(landcover_csv[idx], index_col=0)
+    #         features.loc[features.index == '%d-01-01'%year, landcover_type] = float(df.loc[df['px-py'] == '(%d, %d)' %(px,py), landcover_type])
 
-    features['fraction_forest'].replace("",np.nan, inplace=True)
-    features['fraction_vegetation'].replace("",np.nan, inplace=True)
-    features['fraction_wetland'].replace("",np.nan, inplace=True)
+    # features['fraction_forest'].replace("",np.nan, inplace=True)
+    # features['fraction_vegetation'].replace("",np.nan, inplace=True)
+    # features['fraction_wetland'].replace("",np.nan, inplace=True)
     # features['fraction_cropland'].replace("",np.nan, inplace=True)
-    features['fraction_urban'].replace("",np.nan, inplace=True)
-    features['fraction_water'].replace("",np.nan, inplace=True)
+    # features['fraction_urban'].replace("",np.nan, inplace=True)
+    # features['fraction_water'].replace("",np.nan, inplace=True)
 
-    features['fraction_forest'].fillna(method='ffill', inplace=True)
-    features['fraction_vegetation'].fillna(method='ffill', inplace=True)
-    features['fraction_wetland'].fillna(method='ffill', inplace=True)
+    # features['fraction_forest'].fillna(method='ffill', inplace=True)
+    # features['fraction_vegetation'].fillna(method='ffill', inplace=True)
+    # features['fraction_wetland'].fillna(method='ffill', inplace=True)
     # features['fraction_cropland'].fillna(method='ffill', inplace=True)
-    features['fraction_urban'].fillna(method='ffill', inplace=True)
-    features['fraction_water'].fillna(method='ffill', inplace=True)
+    # features['fraction_urban'].fillna(method='ffill', inplace=True)
+    # features['fraction_water'].fillna(method='ffill', inplace=True)
 
     features['population'].replace("",np.nan, inplace=True)
     features['modis_evi'].replace("",np.nan, inplace=True)
     features['viirs_dnb'].replace("",np.nan, inplace=True)
+    features['elevation'].replace("",np.nan, inplace=True)
     features['population'].fillna(method='ffill', inplace=True)
     features['modis_evi'].fillna(method='ffill', inplace=True)
     features['viirs_dnb'].fillna(method='ffill', inplace=True)
+    features['elevation'].fillna(method='ffill', inplace=True)
     features.loc[features['viirs_dnb'] < 0, 'viirs_dnb'] = 0
     features.loc[features['modis_evi'] < 0, 'modis_evi'] = 0
     features.loc[features['omi_no2'] <= 0, 'omi_no2'] = np.nan
@@ -185,15 +188,17 @@ for cooordidx, (cy, cx) in enumerate(coordinates):
     features.eval("wind10m = sqrt(uwind**2 + vwind**2)", engine='numexpr', inplace=True)
     # //features.eval("wind875 = sqrt(uwind_875**2 + vwind_875**2)", engine='numexpr', inplace=True)
     
-    features.eval("frac_vegc = fraction_forest + fraction_vegetation", engine='numexpr', inplace=True)
-    features = features.drop(['fraction_forest','fraction_vegetation'], axis=1) 
+    # features.eval("frac_vegc = fraction_vegetation + fraction_forest", engine='numexpr', inplace=True)
+    features = features.drop([
+        # 'fraction_forest','fraction_vegetation'
+        'elevation', 'surface_pressure'], axis=1) 
     
     # print("Number of valid rows", len(features.index))
     # print("Number of columns", len(features.columns))
     #! Preserve column orders
-    feature_abbrv = ['AOD', 'day_of_year', 'population', 'viirs_dnb',  'uwind', 'vwind', 'wind10m', 'dewpt_temp', 'air_temp', 'surface_pressure', 'high_cloud_cover', 'low_cloud_cover', 'total_precipitation', 'evaporation', 'boundary_layer_height', 'modis_evi',  'temp_875',  'surface_net_solar_radiation', 'surface_net_thermal_radiation', 's_humidity_875',
+    feature_abbrv = ['AOD', 'day_of_year', 'population', 'viirs_dnb',  'uwind', 'vwind', 'wind10m', 'dewpt_temp', 'air_temp', 'high_cloud_cover', 'low_cloud_cover', 'total_precipitation', 'evaporation', 'boundary_layer_height', 'modis_evi',  'temp_875',  'surface_net_solar_radiation', 'surface_net_thermal_radiation', 's_humidity_875',
     'merra_pm2.5', 'omi_no2', 'modis_lst',
-    'fraction_water',  'fraction_wetland', 'fraction_urban', 'frac_vegc']
+    ]
     
     features = features[feature_abbrv]
 
@@ -208,7 +213,7 @@ for cooordidx, (cy, cx) in enumerate(coordinates):
 
 
 # *preds, lats, lons are lists
-pickle.dump(preds, open("/home/dwight.velasco/scratch1/THESIS/Grid/gcens_cleaner/preds/preds%s"%index, "wb"))
+pickle.dump(preds, open("/home/dwight.velasco/scratch1/THESIS/Grid/gcens_cleaner/predsnz/preds%s"%index, "wb"))
 pickle.dump(lats, open("/home/dwight.velasco/scratch1/THESIS/Grid/gcens_cleaner/lats/lats%s"%index, "wb"))
 pickle.dump(lons, open("/home/dwight.velasco/scratch1/THESIS/Grid/gcens_cleaner/lons/lons%s"%index, "wb"))
 """
@@ -219,7 +224,7 @@ letterlist = [letter for letter in ascii_lowercase]
 
 for letter2 in letterlist:
     print("xa%s" % letter2)
-    pred = pickle.load(open("/home/dwight.velasco/scratch1/THESIS/Grid/gcens_cleaner/preds/predsxa%s" % letter2, "rb"))
+    pred = pickle.load(open("/home/dwight.velasco/scratch1/THESIS/Grid/gcens_cleaner/predsnz/predsxa%s" % letter2, "rb"))
     lat = pickle.load(open("/home/dwight.velasco/scratch1/THESIS/Grid/gcens_cleaner/lats/latsxa%s" % letter2, "rb"))
     lon = pickle.load(open("/home/dwight.velasco/scratch1/THESIS/Grid/gcens_cleaner/lons/lonsxa%s" % letter2, "rb"))
 
@@ -246,7 +251,7 @@ lons = np.array(lons)
 print(preds.shape)
 print(lats.shape)
 print(lons.shape)
-"""
+
 ############################################################################
 # the raster output layer
 output_file = outputfilename
@@ -288,7 +293,7 @@ del output_raster
 ############################################################################
 """
 # the MEAN raster output layer
-output_file= '/home/dwight.velasco/scratch1/THESIS/Renders/PH-raster-v6-mean.tif'
+output_file= '/home/dwight.velasco/scratch1/THESIS/Renders/PH-raster-v11.3-noelevpaLC-mean.tif'
 srs = osr.SpatialReference()
 srs.ImportFromEPSG(4326)
 xres = 0.0270
@@ -310,14 +315,25 @@ print("Mean squeeze:",np.mean(predssqueeze))
 # plt.tight_layout()
 # plt.savefig("/home/dwight.velasco/scratch1/THESIS/Renders/SP-PH/preds-dist.png")
 
-
-
 preds_means = np.mean(preds, axis=1)
 preds_means = np.array(preds_means)
 print(preds_means.shape)
 print("Mean of preds means", np.mean(preds_means))
 print("Col len",len(preds[1,:]))
 print("Row len",len(preds[:,1460]))
+
+date_rng = pd.date_range(start='1/1/2015', end='12/31/2018')
+date_df = pd.DataFrame(date_rng, columns=['Date'])
+date_df['datetime'] = pd.to_datetime(date_df['Date'])
+date_df = date_df.set_index('datetime')
+date_df.drop(['Date'], axis=1, inplace=True)
+date_df['means'] = np.mean(preds, axis=0)
+
+month_df = pd.DataFrame()
+month_df = date_df.means.resample('MS').mean()
+print(month_df.tolist())
+
+sys.exit("Error message")
 
 print("2015:",len(np.mean(preds[:,:365], axis=0)))
 print("2015:",np.mean(np.mean(preds[:,:365], axis=0)))
@@ -334,21 +350,21 @@ leapstart = [0,31,60,91,121,152,182,213,244,274,305,335]
 monthlist = [[] for _ in range(12)]
 
 for monidx, month in enumerate(monthstart):
-    print("2015:",len(np.mean(preds[:,0+month:365], axis=0)))
-    print("2015:",np.mean(np.mean(preds[:,0+month:365], axis=0)))
+    # print("2015:",len(np.mean(preds[:,0+month:365], axis=0)))
+    # print("2015:",np.mean(np.mean(preds[:,0+month:365], axis=0)))
     monthlist[monidx].append(np.mean(np.mean(preds[:,0+month:365], axis=0)))
 
-    print("2017:",len(np.mean(preds[:,731+month:1096], axis=0)))
-    print("2017:",np.mean(np.mean(preds[:,731+month:1096], axis=0)))
+    # print("2017:",len(np.mean(preds[:,731+month:1096], axis=0)))
+    # print("2017:",np.mean(np.mean(preds[:,731+month:1096], axis=0)))
     monthlist[monidx].append(np.mean(np.mean(preds[:,731+month:1096], axis=0)))
 
-    print("2018:",len(np.mean(preds[:,1096+month:], axis=0)))
-    print("2018:",np.mean(np.mean(preds[:,1096+month:], axis=0)))
+    # print("2018:",len(np.mean(preds[:,1096+month:], axis=0)))
+    # print("2018:",np.mean(np.mean(preds[:,1096+month:], axis=0)))
     monthlist[monidx].append(np.mean(np.mean(preds[:,1096+month:], axis=0)))
 
 for monidx2, month2 in enumerate(leapstart):
-    print("2016:",len(np.mean(preds[:,365+month2:731], axis=0)))
-    print("2016:",np.mean(np.mean(preds[:,365+month2:731], axis=0)))
+    # print("2016:",len(np.mean(preds[:,365+month2:731], axis=0)))
+    # print("2016:",np.mean(np.mean(preds[:,365+month2:731], axis=0)))
     monthlist[monidx2].append(np.mean(np.mean(preds[:,365+month2:731], axis=0)))
 
 print([len(month) for month in monthlist])
@@ -382,7 +398,7 @@ for i in range(nbands):
     output_raster.GetRasterBand(i+1).SetNoDataValue(noData)
 
 del output_raster
-
+"""
 
 print(index)
 end_time = time.time()

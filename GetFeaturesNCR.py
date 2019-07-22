@@ -22,6 +22,7 @@ import multiprocessing
 import itertools
 import math
 from string import ascii_lowercase
+import rasterio
 
 # shapely.speedups.enable()
 
@@ -55,8 +56,8 @@ with open(ncr) as f:
 lencoords = len(coordinates)
 # ! CHANGE MODEL AND OUTPUTNAME
 data = 'xgb'
-best_model = pickle.load(open("model-v74-3057-seed69.dat", "rb"))
-outputfilename = '/home/dwight.velasco/scratch1/THESIS/Renders/NCR-v74-3057-seed69.tif'
+best_model = pickle.load(open("model-v85-noelevpaLC.dat", "rb"))
+outputfilename = '/home/dwight.velasco/scratch1/THESIS/Renders/NCR-v85.tif'
 
 landcover_csv = [
 "/home/dwight.velasco/scratch1/THESIS/MCD12Q1/115_xy_LC2.csv", 
@@ -74,7 +75,7 @@ landcover_types = [
 'fraction_water',
 ]
 
-
+"""
 for cooordidx, (cy, cx) in enumerate(coordinates):
     print("\nProcessing: %d/%d ..." %(cooordidx+1, lencoords))
 
@@ -116,6 +117,7 @@ for cooordidx, (cy, cx) in enumerate(coordinates):
     features['population'] = ""
     features['modis_evi'] = ""
     features['viirs_dnb'] = ""
+    features['elevation'] = ""
     
     features['datetime'] = pd.to_datetime(features['Date'])
     features = features.set_index('datetime')
@@ -125,38 +127,40 @@ for cooordidx, (cy, cx) in enumerate(coordinates):
         for date in range(len(dates)):
             features.loc[features.index == dates[date], features.columns[idx-len(storedarrayDate.listlisteddates)]] = storedarrayDate.listlistedvals[idx][date]
 
-    features['fraction_forest'] = ""
-    features['fraction_vegetation'] = ""
-    features['fraction_wetland'] = ""
-    # features['fraction_cropland'] = ""
-    features['fraction_urban'] = ""
-    features['fraction_water'] = ""
-    # ! SET PROPERLY
-    for landcover_type in landcover_types:
-        for idx, year in enumerate(range(2015,2019)):
-            df = pd.read_csv(landcover_csv[idx], index_col=0)
-            features.loc[features.index == '%d-01-01'%year, landcover_type] = float(df.loc[df['px-py'] == '(%d, %d)' %(px,py), landcover_type])
+    # features['fraction_forest'] = ""
+    # features['fraction_vegetation'] = ""
+    # features['fraction_wetland'] = ""
+    # # features['fraction_cropland'] = ""
+    # features['fraction_urban'] = ""
+    # features['fraction_water'] = ""
+    # # ! SET PROPERLY
+    # for landcover_type in landcover_types:
+    #     for idx, year in enumerate(range(2015,2019)):
+    #         df = pd.read_csv(landcover_csv[idx], index_col=0)
+    #         features.loc[features.index == '%d-01-01'%year, landcover_type] = float(df.loc[df['px-py'] == '(%d, %d)' %(px,py), landcover_type])
 
-    features['fraction_forest'].replace("",np.nan, inplace=True)
-    features['fraction_vegetation'].replace("",np.nan, inplace=True)
-    features['fraction_wetland'].replace("",np.nan, inplace=True)
-    # features['fraction_cropland'].replace("",np.nan, inplace=True)
-    features['fraction_urban'].replace("",np.nan, inplace=True)
-    features['fraction_water'].replace("",np.nan, inplace=True)
+    # features['fraction_forest'].replace("",np.nan, inplace=True)
+    # features['fraction_vegetation'].replace("",np.nan, inplace=True)
+    # features['fraction_wetland'].replace("",np.nan, inplace=True)
+    # # features['fraction_cropland'].replace("",np.nan, inplace=True)
+    # features['fraction_urban'].replace("",np.nan, inplace=True)
+    # features['fraction_water'].replace("",np.nan, inplace=True)
 
-    features['fraction_forest'].fillna(method='ffill', inplace=True)
-    features['fraction_vegetation'].fillna(method='ffill', inplace=True)
-    features['fraction_wetland'].fillna(method='ffill', inplace=True)
-    # features['fraction_cropland'].fillna(method='ffill', inplace=True)
-    features['fraction_urban'].fillna(method='ffill', inplace=True)
-    features['fraction_water'].fillna(method='ffill', inplace=True)
+    # features['fraction_forest'].fillna(method='ffill', inplace=True)
+    # features['fraction_vegetation'].fillna(method='ffill', inplace=True)
+    # features['fraction_wetland'].fillna(method='ffill', inplace=True)
+    # # features['fraction_cropland'].fillna(method='ffill', inplace=True)
+    # features['fraction_urban'].fillna(method='ffill', inplace=True)
+    # features['fraction_water'].fillna(method='ffill', inplace=True)
 
     features['population'].replace("",np.nan, inplace=True)
     features['modis_evi'].replace("",np.nan, inplace=True)
     features['viirs_dnb'].replace("",np.nan, inplace=True)
+    features['elevation'].replace("",np.nan, inplace=True)
     features['population'].fillna(method='ffill', inplace=True)
     features['modis_evi'].fillna(method='ffill', inplace=True)
     features['viirs_dnb'].fillna(method='ffill', inplace=True)
+    features['elevation'].fillna(method='ffill', inplace=True)
     features.loc[features['viirs_dnb'] < 0, 'viirs_dnb'] = 0
     features.loc[features['modis_evi'] < 0, 'modis_evi'] = 0
     features.loc[features['omi_no2'] <= 0, 'omi_no2'] = np.nan
@@ -181,16 +185,19 @@ for cooordidx, (cy, cx) in enumerate(coordinates):
     features.eval("wind10m = sqrt(uwind**2 + vwind**2)", engine='numexpr', inplace=True)
     # //features.eval("wind875 = sqrt(uwind_875**2 + vwind_875**2)", engine='numexpr', inplace=True)
     
-    features.eval("frac_vegc = fraction_forest + fraction_vegetation", engine='numexpr', inplace=True)
-    features = features.drop(['fraction_forest','fraction_vegetation'], axis=1) 
+    # features.eval("frac_vegc = fraction_forest + fraction_vegetation", engine='numexpr', inplace=True)
+    features = features.drop([
+        # 'fraction_forest','fraction_vegetation', 
+        'elevation', 'surface_pressure'], axis=1) 
     
     # print("Number of valid rows", len(features.index))
     print("Number of columns", len(features.columns))
     
     #! Preserve column orders
-    feature_abbrv = ['AOD', 'day_of_year', 'population', 'viirs_dnb',  'uwind', 'vwind', 'wind10m', 'dewpt_temp', 'air_temp', 'surface_pressure', 'high_cloud_cover', 'low_cloud_cover', 'total_precipitation', 'evaporation', 'boundary_layer_height', 'modis_evi',  'temp_875',  'surface_net_solar_radiation', 'surface_net_thermal_radiation', 's_humidity_875',
+    feature_abbrv = ['AOD', 'day_of_year', 'population', 'viirs_dnb',  'uwind', 'vwind', 'wind10m', 'dewpt_temp', 'air_temp', 'high_cloud_cover', 'low_cloud_cover', 'total_precipitation', 'evaporation', 'boundary_layer_height', 'modis_evi',  'temp_875',  'surface_net_solar_radiation', 'surface_net_thermal_radiation', 's_humidity_875',
     'merra_pm2.5', 'omi_no2', 'modis_lst',
-    'fraction_water', 'fraction_wetland', 'fraction_urban', 'frac_vegc']
+    #'fraction_water', 'fraction_wetland', 'fraction_urban'
+    ]
     
     features = features[feature_abbrv]
     # print(features.columns)
@@ -204,7 +211,7 @@ for cooordidx, (cy, cx) in enumerate(coordinates):
     predictions = np.array(predictions)
     preds.append(predictions)
 
-
+"""
 # *preds, lats, lons are lists
 
 # preds = list(itertools.chain.from_iterable(preds))
