@@ -1,5 +1,5 @@
 # RasterToArray
-Convert Raster files (.vrt) to numpy array; model production code
+Model production code
 
 * GetFeatures.py
   * produces estimates on unseen data using the model trained by XGB.py
